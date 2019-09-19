@@ -1,24 +1,18 @@
-language: r
-r_packages:
-- covr
-- drat
-- pkgdown
-- styler
+language: minimal
+
+services:
+- docker
+
 before_install:
+- export RVERSION=3.6.0
 - bash travis/make.sh
+
+install:
+- export package=$(pwd)
+- docker pull fhix/dr:$RVERSION
+- docker run --rm -v $package:/package fhix/dr:$RVERSION R -e "devtools::check('/package/')"
+
 after_success:
-- Rscript -e 'library(covr); codecov()'
-- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash
-  travis/drat.sh
-- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash
-  travis/styler.sh
-- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && Rscript
-  -e 'Sys.sleep(10);install.packages("ui",repos="https://folkehelseinstituttet.github.io/drat/");pkgdown::build_site()'
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: "$GITHUB_PAT"
-  keep-history: true
-  local-dir: docs
-  on:
-    branch: master
+- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash travis/after-success.sh
+
+

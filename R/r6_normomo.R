@@ -127,7 +127,7 @@ normomo_email_internal <- function() {
     subject = glue::glue("NorMOMO: Uke {normomo_yrwk()} d{fhi::nb$oe}dlighet"),
     html = html,
     to = "dashboardsfhi@gmail.com",
-    bcc = "riwh@fhi.no",
+    bcc = fd::e_emails("normomo_results"),
     inlines = c(tab1, img1, img2)
   )
 }
