@@ -13,7 +13,7 @@ normomo <-  R6::R6Class(
       if("brain_normomo" %in% rundate$package){
         if(rundate[package=="brain_normomo"]$date_extraction >= rundate[package=="normomo"]$date_extraction) run <- FALSE
       }
-      if(!run) return()
+      if(!run & fd::config$is_production) return()
 
       # write results as excel file
       fs::dir_create(fd::path("results", normomo_yrwk(), "data", package="normomo"))
