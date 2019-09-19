@@ -29,7 +29,7 @@ normomo <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="brain_normomo",
+        package = "brain_normomo",
         date_extraction = rundate[package == "normomo"]$date_extraction,
         date_results = rundate[package == "normomo"]$date_results,
         date_run = lubridate::today()
@@ -46,7 +46,7 @@ normomo_yrwk <- function() {
   return(yrwk)
 }
 
-normomo_write_results <- function(){
+normomo_write_results <- function() {
   fs::dir_create(fd::path("results", normomo_yrwk(), "data", package = "normomo"))
 
   d <- fd::tbl("normomo_standard_results") %>%
@@ -61,13 +61,15 @@ normomo_write_results <- function(){
 
 normomo_email_ssi <- function() {
   action <- fd::perform_action(
-    file=fd::path("config","normomo_email_ssi.txt"),
-    value=normomo_yrwk()
+    file = fd::path("config", "normomo_email_ssi.txt"),
+    value = normomo_yrwk()
   )
-  if(!action$can_perform_action()) return()
+  if (!action$can_perform_action()) {
+    return()
+  }
 
-  folder <- fs::dir_ls(fd::path("results", normomo_yrwk(), "MOMO", package = "normomo"), regexp="norway")
-  folder <- fs::dir_ls(folder,regexp="COMPLETE")
+  folder <- fs::dir_ls(fd::path("results", normomo_yrwk(), "MOMO", package = "normomo"), regexp = "norway")
+  folder <- fs::dir_ls(folder, regexp = "COMPLETE")
   file <- fs::dir_ls(folder)
 
   html <- glue::glue("
