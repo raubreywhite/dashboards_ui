@@ -7,8 +7,8 @@ normomo <- R6::R6Class(
   cloneable = FALSE,
   list(
     run_all = function() {
+      # check to see if it can run
       rundate <- fd::get_rundate()
-
       run <- TRUE
       if ("brain_normomo" %in% rundate$package) {
         if (rundate[package == "brain_normomo"]$date_extraction >= rundate[package == "normomo"]$date_extraction) run <- FALSE
@@ -18,20 +18,22 @@ normomo <- R6::R6Class(
       }
 
       # write results as excel file
-      fs::dir_create(fd::path("results", normomo_yrwk(), "data", package = "normomo"))
-      d <- fd::tbl("normomo_standard_results") %>%
-        dplyr::collect() %>%
-        fd::latin1_to_utf8()
-      writexl::write_xlsx(
-        d,
-        path = fd::path("results", normomo_yrwk(), "data", "results.xlsx", package = "normomo")
-      )
+      normomo_write_results()
 
       # make graphs
       normomo_graphs()
 
       # send email
       normomo_email_internal()
+      normomo_email_ssi()
+
+      # update rundate
+      fd::update_rundate(
+        package="brain_normomo",
+        date_extraction = rundate[package == "normomo"]$date_extraction,
+        date_results = rundate[package == "normomo"]$date_results,
+        date_run = lubridate::today()
+      )
     }
   )
 )
@@ -43,6 +45,51 @@ normomo_yrwk <- function() {
 
   return(yrwk)
 }
+
+normomo_write_results <- function(){
+  fs::dir_create(fd::path("results", normomo_yrwk(), "data", package = "normomo"))
+
+  d <- fd::tbl("normomo_standard_results") %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+
+  writexl::write_xlsx(
+    d,
+    path = fd::path("results", normomo_yrwk(), "data", "results.xlsx", package = "normomo")
+  )
+}
+
+normomo_email_ssi <- function() {
+  action <- fd::perform_action(
+    file=fd::path("config","normomo_email_ssi.txt"),
+    value=normomo_yrwk()
+  )
+  if(!action$can_perform_action()) return()
+
+  folder <- fs::dir_ls(fd::path("results", normomo_yrwk(), "MOMO", package = "normomo"), regexp="norway")
+  folder <- fs::dir_ls(folder,regexp="COMPLETE")
+  file <- fs::dir_ls(folder)
+
+  html <- glue::glue("
+    Dear EuroMOMO hub,
+
+    Please find attached the current week's results.
+
+    Sincerely,
+
+    Norway
+    ")
+
+  fd::mailgun(
+    subject = glue::glue("[euromomo input] [Norway] [{stringr::str_replace(normomo_yrwk(), '-', ' ')}]"),
+    html = html,
+    to = fd::e_emails("normomo_ssi"),
+    attachments = file
+  )
+
+  action$action_performed()
+}
+
 
 normomo_email_internal <- function() {
   d <- fd::tbl("normomo_standard_results") %>%

@@ -17,7 +17,8 @@ Imports:
   fs,
   glue,
   gridExtra,
-  huxtable
+  huxtable,
+  writexl
 Suggests:
   testthat,
     knitr,
