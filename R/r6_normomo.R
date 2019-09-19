@@ -1,28 +1,30 @@
 #' normomo
 #' @import R6
 #' @export normomo
-normomo <-  R6::R6Class(
+normomo <- R6::R6Class(
   "normomo",
   portable = FALSE,
   cloneable = FALSE,
   list(
-    run_all = function(){
+    run_all = function() {
       rundate <- fd::get_rundate()
 
       run <- TRUE
-      if("brain_normomo" %in% rundate$package){
-        if(rundate[package=="brain_normomo"]$date_extraction >= rundate[package=="normomo"]$date_extraction) run <- FALSE
+      if ("brain_normomo" %in% rundate$package) {
+        if (rundate[package == "brain_normomo"]$date_extraction >= rundate[package == "normomo"]$date_extraction) run <- FALSE
       }
-      if(!run & fd::config$is_production) return()
+      if (!run & fd::config$is_production) {
+        return()
+      }
 
       # write results as excel file
-      fs::dir_create(fd::path("results", normomo_yrwk(), "data", package="normomo"))
+      fs::dir_create(fd::path("results", normomo_yrwk(), "data", package = "normomo"))
       d <- fd::tbl("normomo_standard_results") %>%
         dplyr::collect() %>%
         fd::latin1_to_utf8()
       writexl::write_xlsx(
         d,
-        path = fd::path("results", normomo_yrwk(), "data", "results.xlsx", package="normomo")
+        path = fd::path("results", normomo_yrwk(), "data", "results.xlsx", package = "normomo")
       )
 
       # make graphs
@@ -34,8 +36,8 @@ normomo <-  R6::R6Class(
   )
 )
 
-normomo_yrwk <- function(){
-  folder_res <- fs::dir_ls(fd::path("results", package = "normomo"), regexp="[0-9][0-9][0-9][0-9]-[0-9][0-9]$")
+normomo_yrwk <- function() {
+  folder_res <- fs::dir_ls(fd::path("results", package = "normomo"), regexp = "[0-9][0-9][0-9][0-9]-[0-9][0-9]$")
   folder_res <- max(folder_res)
   yrwk <- fs::path_file(folder_res)
 
@@ -133,10 +135,10 @@ normomo_email_internal <- function() {
 }
 
 
-normomo_graphs <- function(){
+normomo_graphs <- function() {
   fd::msg("Running normomo graphs")
 
-  folder <- fd::path("results", normomo_yrwk(), "graphs_status", package="normomo")
+  folder <- fd::path("results", normomo_yrwk(), "graphs_status", package = "normomo")
   fs::dir_create(folder)
 
   locs <- c("norge", unique(fhidata::norway_locations_current$county_code))
@@ -159,16 +161,12 @@ normomo_graphs <- function(){
   }
 
   normomo_tiles_fylker(folder)
-
-
 }
 
 normomo_graphs_deaths <- function(
-  runName = "norge",
-  data,
-  folder
-) {
-
+                                  runName = "norge",
+                                  data,
+                                  folder) {
   storedData <- list()
   if (runName == "norge") {
     runList <- c("Total", "0to4", "5to14", "15to64", "65P")
@@ -217,7 +215,7 @@ normomo_graphs_deaths <- function(
       ),
       ncol = 1,
       newpage = F,
-      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package=="normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
+      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
     )
     fhiplot::save_a4(q, filename = paste0(folder, "/excl_reported_", runName, "-", i, "-", normomo_yrwk(), ".png"))
 
@@ -230,14 +228,14 @@ normomo_graphs_deaths <- function(
       ),
       ncol = 1,
       newpage = F,
-      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package=="normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
+      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
     )
     fhiplot::save_a4(q, filename = paste0(folder, "/incl_reported_", runName, "-", i, "-", normomo_yrwk(), ".png"))
   }
 }
 
 
-normomo_tiles_fylker <- function(folder){
+normomo_tiles_fylker <- function(folder) {
   allResults <- fd::tbl("normomo_standard_results") %>%
     dplyr::filter(age == "Total") %>%
     dplyr::collect() %>%
@@ -267,36 +265,36 @@ normomo_tiles_fylker <- function(folder){
   q <- q + geom_tile(colour = "black")
   q <- q + geom_tile(data = plotColours, alpha = 0)
   q <- q + scale_fill_manual("",
-                             values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
-                             labels = c(
-                               "Betydelig h\u00F8yere enn forventet",
-                               "H\u00F8yere enn forventet",
-                               "Forventet/lavere enn forventet"
-                             )
+    values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
+    labels = c(
+      "Betydelig h\u00F8yere enn forventet",
+      "H\u00F8yere enn forventet",
+      "Forventet/lavere enn forventet"
+    )
   )
   q <- q + labs(title = "Totalt antall d\u00F8de per uke siste \u00E5r")
   q <- q + scale_x_discrete("\u00C5r-uke", expand = c(0, 0))
   q <- q + scale_y_discrete("", expand = c(0, 0))
-  q <- q + labs(caption = sprintf("Sist oppdatert: %s", strftime(fd::get_rundate()[package=="normomo"]$date_extraction, format = "%d/%m/%Y")))
+  q <- q + labs(caption = sprintf("Sist oppdatert: %s", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y")))
   q <- q + fhiplot::theme_fhi_basic()
   q <- q + fhiplot::set_x_axis_vertical()
-  #q
+  # q
   fhiplot::save_a4(
     q,
-    fs::path(folder,glue::glue("Status_tiles-{normomo_yrwk()}.png")),
+    fs::path(folder, glue::glue("Status_tiles-{normomo_yrwk()}.png")),
     landscape = T
   )
 }
 
 
 GraphTogether <- function(
-  data,
-  norwegian = TRUE,
-  title1 = NULL,
-  title1a = NULL,
-  title1b = NULL,
-  title2,
-  includeRealDeaths = FALSE) {
+                          data,
+                          norwegian = TRUE,
+                          title1 = NULL,
+                          title1a = NULL,
+                          title1b = NULL,
+                          title2,
+                          includeRealDeaths = FALSE) {
   if (!is.null(title1)) {
     plottingData1 <- data[wk >= max(wk) - 52]
     plottingData2 <- data[wk >= max(wk) - 52 * 5 + 1]
@@ -373,24 +371,25 @@ GraphTogether <- function(
   q <- q + geom_point(data = plottingData[unstableEstimates == "Unstable"], aes(y = nbc, shape = "Usikkert"), size = 2)
   q <- q + facet_wrap(~titlex, scales = "free", ncol = 1)
   # q <- q + labs(title=title)
-  q <- q + scale_x_continuous("", breaks = breaks$wk, labels = breaks$label,expand=expand_scale(mult = c(0, 0.01)))
+  q <- q + scale_x_continuous("", breaks = breaks$wk, labels = breaks$label, expand = expand_scale(mult = c(0, 0.01)))
   q <- q + scale_y_continuous(ylabel)
   q <- q + scale_fill_manual("",
-                             values = c(
-                               "1predinterval" = "#636363",
-                               "2veryhigh" = fhiplot::warning_color[["hig"]],
-                               "3high" = fhiplot::warning_color[["med"]],
-                               "4expected" = fhiplot::warning_color[["low"]],
-                               "5lower" = "white"),
-                             labels = filllabels1
+    values = c(
+      "1predinterval" = "#636363",
+      "2veryhigh" = fhiplot::warning_color[["hig"]],
+      "3high" = fhiplot::warning_color[["med"]],
+      "4expected" = fhiplot::warning_color[["low"]],
+      "5lower" = "white"
+    ),
+    labels = filllabels1
   )
   q <- q + scale_shape_manual("",
-                              values = c("Usikkert" = 16),
-                              labels = shapelabels
+    values = c("Usikkert" = 16),
+    labels = shapelabels
   )
   q <- q + scale_colour_manual("",
-                               values = c("Korrigert" = "black", "Rapporterte" = "red"),
-                               labels = colourlabels
+    values = c("Korrigert" = "black", "Rapporterte" = "red"),
+    labels = colourlabels
   )
   q <- q + fhiplot::theme_fhi_lines(base_size = 18)
   q <- q + fhiplot::set_x_axis_vertical()
@@ -409,4 +408,3 @@ GraphTogether <- function(
   # q <- format_plot(q,2,2,stripes=TRUE, xangle=90)
   return(q)
 }
-
