@@ -21,7 +21,7 @@ sykdomspuls_email_obs <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="ui_sykdomspuls_email_obs",
+        package = "ui_sykdomspuls_email_obs",
         date_extraction = rundate[package == "sykdomspuls"]$date_extraction,
         date_results = rundate[package == "sykdomspuls"]$date_results,
         date_run = lubridate::today()
@@ -88,10 +88,10 @@ EmailExternalGenerateTable <- function(results, xtag, xemail) {
 #' @param forceYesOutbreak For testing. Do you want to force a "Yes outbreak" email?
 #' @export EmailExternal
 EmailExternal <- function(
-  results = readRDS(fd::path("results", sprintf("%s/outbreaks_alert_external.RDS", latest_date()))),
-  alerts = GetAlertsEmails(),
-  forceNoOutbreak = FALSE,
-  forceYesOutbreak = FALSE) {
+                          results = readRDS(fd::path("results", sprintf("%s/outbreaks_alert_external.RDS", latest_date()))),
+                          alerts = GetAlertsEmails(),
+                          forceNoOutbreak = FALSE,
+                          forceYesOutbreak = FALSE) {
   # variables used in data.table functions in this function
   output <- NULL
   tag <- NULL
@@ -220,4 +220,3 @@ EmailExternal <- function(
 
   return(0)
 }
-
