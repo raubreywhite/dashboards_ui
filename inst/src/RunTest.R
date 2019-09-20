@@ -1,4 +1,4 @@
-for(baseFolder in c("/data_clean","/results","/data_app")){
+for(baseFolder in c("/data_clean","/results","/data_app","/config")){
   files <- list.files(file.path(baseFolder,"ui"))
   if(length(files)>0){
     for(f in files) unlink(file.path(baseFolder,"ui",f))

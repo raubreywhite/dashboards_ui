@@ -3,6 +3,7 @@
 export("%>%")
 export(CONFIG)
 export(normomo)
+export(sykdomspuls)
 import(R6)
 import(data.table)
 importFrom(magrittr,"%>%")

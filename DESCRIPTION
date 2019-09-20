@@ -18,7 +18,8 @@ Imports:
   glue,
   gridExtra,
   huxtable,
-  writexl
+  writexl,
+  sykdomspuls
 Suggests:
   testthat,
     knitr,

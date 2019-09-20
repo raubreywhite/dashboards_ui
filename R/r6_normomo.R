@@ -10,8 +10,8 @@ normomo <- R6::R6Class(
       # check to see if it can run
       rundate <- fd::get_rundate()
       run <- TRUE
-      if ("brain_normomo" %in% rundate$package) {
-        if (rundate[package == "brain_normomo"]$date_extraction >= rundate[package == "normomo"]$date_extraction) run <- FALSE
+      if ("ui_normomo" %in% rundate$package) {
+        if (rundate[package == "ui_normomo"]$date_extraction >= rundate[package == "normomo"]$date_extraction) run <- FALSE
       }
       if (!run & fd::config$is_production) {
         return()
@@ -29,7 +29,7 @@ normomo <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="brain_normomo",
+        package="ui_normomo",
         date_extraction = rundate[package == "normomo"]$date_extraction,
         date_results = rundate[package == "normomo"]$date_results,
         date_run = lubridate::today()
