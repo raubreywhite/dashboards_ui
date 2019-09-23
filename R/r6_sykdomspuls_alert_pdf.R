@@ -1,3 +1,5 @@
+sykdomspuls_alert_pdf_production_days <- c(3:5)
+
 #' normomo
 #' @import R6
 #' @export sykdomspuls_alert_pdf
@@ -11,13 +13,23 @@ sykdomspuls_alert_pdf <- R6::R6Class(
       rundate <- fd::get_rundate()
       run <- TRUE
       if ("ui_sykdomspuls_alert_pdf" %in% rundate$package) {
-        if (rundate[package == "ui_sykdomspuls"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
+        if (rundate[package == "ui_sykdomspuls_alert_pdf"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
       }
       if (!run & fd::config$is_production) {
         return()
       }
 
-      sykdomspuls_std_alerts_pdf()
+      action <- fd::perform_action(
+        key="sykdomspuls_alert_pdf_email",
+        value=fhi::isoyearweek(sykdomspuls_date()),
+        dev_always_performs = TRUE,
+        production_days=sykdomspuls_alert_pdf_production_days,
+        first_date_of_production = "2019-09-21"
+      )
+      if(action$can_perform_action()){
+        sykdomspuls_std_alerts_pdf()
+        action$action_performed()
+      }
 
       # update rundate
       fd::update_rundate(
@@ -104,19 +116,14 @@ sykdomspuls_std_alerts_pdf <- function() {
   attachments <- d$attachment
   if (length(attachments) > 10) attachments <- attachments[1:10]
 
-  action <- fd::perform_action(
-    file=fd::path("config","sykdomspuls_email_alert_pdf.txt"),
-    value=fhi::isoyearweek(sykdomspuls_date())
-  )
-  if(!action$can_perform_action()) return()
-
   fd::mailgun(
     subject = "Sykdomspuls alert pdfs",
     html = html,
-    bcc = fd::e_emails("sykdomspuls_emerg"),
+    bcc = fd::e_emails(
+      "sykdomspuls_emerg",
+      production_days = sykdomspuls_alert_pdf_production_days
+      ),
     attachments = attachments
   )
-
-  action$action_performed()
 }
 

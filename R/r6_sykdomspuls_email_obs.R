@@ -1,8 +1,10 @@
+sykdomspuls_obs_production_days <- c(3:5)
+
 #' normomo
 #' @import R6
-#' @export sykdomspuls_email_obs
-sykdomspuls_email_obs <- R6::R6Class(
-  "sykdomspuls_email_obs",
+#' @export sykdomspuls_obs
+sykdomspuls_obs <- R6::R6Class(
+  "sykdomspuls_obs",
   portable = FALSE,
   cloneable = FALSE,
   list(
@@ -10,18 +12,28 @@ sykdomspuls_email_obs <- R6::R6Class(
       # check to see if it can run
       rundate <- fd::get_rundate()
       run <- TRUE
-      if ("ui_sykdomspuls_email_obs" %in% rundate$package) {
-        if (rundate[package == "ui_sykdomspuls_email_obs"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
+      if ("ui_sykdomspuls_obs" %in% rundate$package) {
+        if (rundate[package == "ui_sykdomspuls_obs"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
       }
       if (!run & fd::config$is_production) {
         return()
       }
 
-      sykdomspuls_std_alerts_pdf()
+      action <- fd::perform_action(
+        key="sykdomspuls_obs_email",
+        value=fhi::isoyearweek(sykdomspuls_date()),
+        dev_always_performs = TRUE,
+        production_days=sykdomspuls_obs_production_days,
+        first_date_of_production = "2019-09-21"
+      )
+      if(action$can_perform_action()){
+        sykdomspuls_obs_email_external()
+        action$action_performed()
+      }
 
       # update rundate
       fd::update_rundate(
-        package="ui_sykdomspuls_email_obs",
+        package="ui_sykdomspuls_obs",
         date_extraction = rundate[package == "sykdomspuls"]$date_extraction,
         date_results = rundate[package == "sykdomspuls"]$date_results,
         date_run = lubridate::today()
@@ -31,32 +43,12 @@ sykdomspuls_email_obs <- R6::R6Class(
 )
 
 
-#' Generates the outbreak table for the external email
-#' @param results a
-#' @param xtag a
-#' @param xemail a
-#' @import data.table
-#' @export EmailExternalGenerateTable
-EmailExternalGenerateTable <- function(results, xtag, xemail) {
-  . <- NULL
-  zscore <- NULL
-  link <- NULL
-  county <- NULL
-  location <- NULL
-  tag <- NULL
-  age <- NULL
-  tag_pretty <- NULL
-  output <- NULL
-  locationName <- NULL
-  cumE1 <- NULL
-  email <- NULL
-  n <- NULL
-
-  r <- results[email == xemail & tag == xtag]
+EmailExternalGenerateTable <- function(results, xtag) {
+  r <- results[tag == xtag]
   setorder(r, tag, -zscore)
 
   if (nrow(r) == 0) {
-    return(sprintf("%s utbrudd:<br><br>Ingen utbrudd registrert", CONFIG$SYNDROMES[tag == xtag]$namesLong))
+    return(sprintf("%s utbrudd:<br><br>Ingen utbrudd registrert", sykdomspuls::CONFIG$SYNDROMES[tag == xtag]$namesLong))
   }
 
   tab <- huxtable::huxtable(
@@ -68,7 +60,7 @@ EmailExternalGenerateTable <- function(results, xtag, xemail) {
     `Z-verdi` = r$zscore
   ) %>%
     huxtable::add_colnames() %>%
-    huxtable_theme()
+    fhiplot::huxtable_theme_fhi_basic()
   huxtable::escape_contents(tab)[, 2] <- FALSE
   huxtable::escape_contents(tab)[1, 4:5] <- FALSE
   huxtable::number_format(tab)[, 5] <- 0
@@ -82,30 +74,19 @@ EmailExternalGenerateTable <- function(results, xtag, xemail) {
 }
 
 #' Sends an external email warning about alters
-#' @param results Results file.
-#' @param alerts Excel file containing the emails.
-#' @param forceNoOutbreak For testing. Do you want to force a "No outbreak" email?
-#' @param forceYesOutbreak For testing. Do you want to force a "Yes outbreak" email?
-#' @export EmailExternal
-EmailExternal <- function(
-  results = readRDS(fd::path("results", sprintf("%s/outbreaks_alert_external.RDS", latest_date()))),
-  alerts = GetAlertsEmails(),
-  forceNoOutbreak = FALSE,
-  forceYesOutbreak = FALSE) {
-  # variables used in data.table functions in this function
-  output <- NULL
-  tag <- NULL
-  locationName <- NULL
-  location <- NULL
-  age <- NULL
-  cumE1 <- NULL
-  zscore <- NULL
-  email <- NULL
-  link <- NULL
-  county <- NULL
-  alertExternal <- NULL
-  # end
+sykdomspuls_obs_email_external <- function(){
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package=="sykdomspuls"]$date_results)
+  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal==T]$tag
 
+  results <- fd::tbl("spuls_standard_results") %>%
+    dplyr::filter(granularity_time == "weekly") %>%
+    dplyr::filter(yrwk == !!max_yrwk) %>%
+    dplyr::filter(status != "Normal") %>%
+    dplyr::filter(tag %in% !!tag_relevant) %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+
+  alerts <- sykdomspuls::GetAlertsEmails()
   setDT(alerts)
   emails <- unique(alerts$email)
 
@@ -113,13 +94,9 @@ EmailExternal <- function(
   emailSubjectNoOutbreak <- "Pilotprosjektet Sykdomspulsen til kommunehelsetjenesten er oppdatert med nye tall"
   emailSubjectYesOutbreak <- "OBS varsel fra Sykdomspulsen"
 
-  if (fd::config$is_production) {
-    if (forceNoOutbreak | forceYesOutbreak) stop("forceNoOutbreak/forceYesOutbreak set when not testing")
-  } else {
+  if (!fd::config$is_production) {
     if (!"test@rwhite.no" %in% unique(alerts$email)) stop("THIS IS NOT A TEST EMAIL DATASET")
-    if (forceNoOutbreak & forceYesOutbreak) stop("both forceNoOutbreak/forceYesOutbreak set")
   }
-
 
   emailNoOutbreak <-
     "Pilotprosjektet Sykdomspulsen til kommunehelsetjenesten er oppdatert med nye tall.<br>
@@ -171,18 +148,22 @@ EmailExternal <- function(
 
   setorder(results, -zscore)
   results[, tag_pretty := tag]
-  RAWmisc::RecodeDT(results, switch = CONFIG$tagsWithLong, var = "tag_pretty", oldOnLeft = FALSE)
+  RAWmisc::RecodeDT(results, switch = sykdomspuls::CONFIG$tagsWithLong, var = "tag_pretty", oldOnLeft = FALSE)
   results[, link := sprintf("<a href='http://sykdomspulsen.fhi.no/lege123/#/ukentlig/%s/%s/%s/%s'>%s</a>", county_code, location_code, tag, age, location_name)]
   results[is.na(county_code), link := sprintf("<a href='http://sykdomspulsen.fhi.no/lege123/#/ukentlig/%s/%s/%s/%s'>%s</a>", location_code, location_code, tag, age, location_name)]
 
 
   for (em in emails) {
-    r <- results[email %in% em]
     a <- alerts[email %in% em]
 
+    r <- vector("list", length=nrow(a))
+    for(i in 1:nrow(a)){
+      r[[i]] <- results[stringr::str_detect(location_code,a$location[i]) & status %in% a$statuses[[i]]]
+    }
+    r <- rbindlist(r)
+
+
     noOutbreak <- nrow(r) == 0
-    if (forceNoOutbreak) noOutbreak <- TRUE
-    if (forceYesOutbreak) noOutbreak <- FALSE
 
     # no outbreaks
     if (noOutbreak) {
@@ -198,15 +179,15 @@ EmailExternal <- function(
     # include registered places
     tab <- huxtable::huxtable("Geografisk omr\u00E5de" = a$location) %>%
       huxtable::add_colnames() %>%
-      huxtable_theme()
+      fhiplot::huxtable_theme_fhi_basic()
     huxtable::escape_contents(tab)[1, 1] <- FALSE
     tab <- huxtable::to_html(tab)
 
     emailText <- paste0(emailText, "Du er registrert for \u00E5 motta varsel om utbrudd i:<br>", tab, "<br><br>")
 
     # include outbreaks
-    for (tag in CONFIG$SYNDROMES[alertExternal == T]$tag) {
-      emailText <- paste0(emailText, EmailExternalGenerateTable(results = r, xtag = tag, xemail = useEmail), "<br>")
+    for (tag in sykdomspuls::CONFIG$SYNDROMES[alertExternal == T]$tag) {
+      emailText <- paste0(emailText, EmailExternalGenerateTable(results = r, xtag = tag), "<br>")
     }
 
     fd::mailgun(
@@ -215,9 +196,11 @@ EmailExternal <- function(
       to = em
     )
 
-    Sys.sleep(5)
+    Sys.sleep(1)
   }
 
   return(0)
 }
+
+
 

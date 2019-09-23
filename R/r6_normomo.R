@@ -1,3 +1,5 @@
+normomo_production_days <- c(2,3)
+
 #' normomo
 #' @import R6
 #' @export normomo
@@ -24,8 +26,17 @@ normomo <- R6::R6Class(
       normomo_graphs()
 
       # send email
-      normomo_email_internal()
-      normomo_email_ssi()
+      action <- fd::perform_action(
+        key="normomo_email",
+        value=normomo_yrwk(),
+        dev_always_performs = TRUE,
+        first_date_of_production = "2019-09-21"
+      )
+      if(action$can_perform_action()){
+        normomo_email_internal()
+        normomo_email_ssi()
+        action$action_performed()
+      }
 
       # update rundate
       fd::update_rundate(
@@ -60,14 +71,6 @@ normomo_write_results <- function() {
 }
 
 normomo_email_ssi <- function() {
-  action <- fd::perform_action(
-    file = fd::path("config", "normomo_email_ssi.txt"),
-    value = normomo_yrwk()
-  )
-  if (!action$can_perform_action()) {
-    return()
-  }
-
   folder <- fs::dir_ls(fd::path("results", normomo_yrwk(), "MOMO", package = "normomo"), regexp = "norway")
   folder <- fs::dir_ls(folder, regexp = "COMPLETE")
   file <- fs::dir_ls(folder)
@@ -85,11 +88,10 @@ normomo_email_ssi <- function() {
   fd::mailgun(
     subject = glue::glue("[euromomo input] [Norway] [{stringr::str_replace(normomo_yrwk(), '-', ' ')}]"),
     html = html,
-    to = fd::e_emails("normomo_ssi"),
-    attachments = file
+    to = fd::e_emails("normomo_ssi", production_days = normomo_production_days),
+    attachments = file,
+    production_days = normomo_production_days
   )
-
-  action$action_performed()
 }
 
 
