@@ -2,8 +2,6 @@
 
 export("%>%")
 export(CONFIG)
-export(EmailExternal)
-export(EmailExternalGenerateTable)
 export(normomo)
 export(sykdomspuls_alert_pdf)
 export(sykdomspuls_obs)

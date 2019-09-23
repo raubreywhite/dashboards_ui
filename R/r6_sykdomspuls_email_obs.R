@@ -20,20 +20,20 @@ sykdomspuls_obs <- R6::R6Class(
       }
 
       action <- fd::perform_action(
-        key="sykdomspuls_obs_email",
-        value=fhi::isoyearweek(sykdomspuls_date()),
+        key = "sykdomspuls_obs_email",
+        value = fhi::isoyearweek(sykdomspuls_date()),
         dev_always_performs = TRUE,
-        production_days=sykdomspuls_obs_production_days,
+        production_days = sykdomspuls_obs_production_days,
         first_date_of_production = "2019-09-21"
       )
-      if(action$can_perform_action()){
+      if (action$can_perform_action()) {
         sykdomspuls_obs_email_external()
         action$action_performed()
       }
 
       # update rundate
       fd::update_rundate(
-        package="ui_sykdomspuls_obs",
+        package = "ui_sykdomspuls_obs",
         date_extraction = rundate[package == "sykdomspuls"]$date_extraction,
         date_results = rundate[package == "sykdomspuls"]$date_results,
         date_run = lubridate::today()
@@ -74,9 +74,9 @@ EmailExternalGenerateTable <- function(results, xtag) {
 }
 
 #' Sends an external email warning about alters
-sykdomspuls_obs_email_external <- function(){
-  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package=="sykdomspuls"]$date_results)
-  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal==T]$tag
+sykdomspuls_obs_email_external <- function() {
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results)
+  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   results <- fd::tbl("spuls_standard_results") %>%
     dplyr::filter(granularity_time == "weekly") %>%
@@ -156,9 +156,9 @@ sykdomspuls_obs_email_external <- function(){
   for (em in emails) {
     a <- alerts[email %in% em]
 
-    r <- vector("list", length=nrow(a))
-    for(i in 1:nrow(a)){
-      r[[i]] <- results[stringr::str_detect(location_code,a$location[i]) & status %in% a$statuses[[i]]]
+    r <- vector("list", length = nrow(a))
+    for (i in 1:nrow(a)) {
+      r[[i]] <- results[stringr::str_detect(location_code, a$location[i]) & status %in% a$statuses[[i]]]
     }
     r <- rbindlist(r)
 

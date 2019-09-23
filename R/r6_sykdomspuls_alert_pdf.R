@@ -20,13 +20,13 @@ sykdomspuls_alert_pdf <- R6::R6Class(
       }
 
       action <- fd::perform_action(
-        key="sykdomspuls_alert_pdf_email",
-        value=fhi::isoyearweek(sykdomspuls_date()),
+        key = "sykdomspuls_alert_pdf_email",
+        value = fhi::isoyearweek(sykdomspuls_date()),
         dev_always_performs = TRUE,
-        production_days=sykdomspuls_alert_pdf_production_days,
+        production_days = sykdomspuls_alert_pdf_production_days,
         first_date_of_production = "2019-09-21"
       )
-      if(action$can_perform_action()){
+      if (action$can_perform_action()) {
         sykdomspuls_std_alerts_pdf()
         action$action_performed()
       }
@@ -123,7 +123,7 @@ sykdomspuls_std_alerts_pdf <- function() {
     bcc = fd::e_emails(
       "sykdomspuls_emerg",
       production_days = sykdomspuls_alert_pdf_production_days
-      ),
+    ),
     attachments = attachments
   )
 }

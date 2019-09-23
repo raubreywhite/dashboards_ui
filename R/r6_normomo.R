@@ -1,4 +1,4 @@
-normomo_production_days <- c(2,3)
+normomo_production_days <- c(2, 3)
 
 #' normomo
 #' @import R6
@@ -27,12 +27,12 @@ normomo <- R6::R6Class(
 
       # send email
       action <- fd::perform_action(
-        key="normomo_email",
-        value=normomo_yrwk(),
+        key = "normomo_email",
+        value = normomo_yrwk(),
         dev_always_performs = TRUE,
         first_date_of_production = "2019-09-21"
       )
-      if(action$can_perform_action()){
+      if (action$can_perform_action()) {
         normomo_email_internal()
         normomo_email_ssi()
         action$action_performed()
