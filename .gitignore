@@ -8,3 +8,4 @@ docs/*
 inst/doc
 *.Rcheck*
 travis/.DS_Store
+R/.DS_Store

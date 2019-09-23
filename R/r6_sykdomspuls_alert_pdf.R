@@ -112,7 +112,7 @@ sykdomspuls_std_alerts_pdf <- function() {
     subject = "Sykdomspuls alert pdfs",
     html = html,
     bcc = fd::e_emails(
-      "sykdomspuls_emerg",
+      "sykdomspuls_utbrudd",
       is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
     ),
     attachments = attachments,
