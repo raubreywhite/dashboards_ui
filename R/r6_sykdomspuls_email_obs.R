@@ -24,7 +24,7 @@ sykdomspuls_obs <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="ui_sykdomspuls_obs",
+        package = "ui_sykdomspuls_obs",
         date_extraction = rundate[package == "sykdomspuls"]$date_extraction,
         date_results = rundate[package == "sykdomspuls"]$date_results,
         date_run = lubridate::today()
@@ -65,9 +65,9 @@ EmailExternalGenerateTable <- function(results, xtag) {
 }
 
 #' Sends an external email warning about alters
-sykdomspuls_obs_email_external <- function(){
-  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package=="sykdomspuls"]$date_results)
-  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal==T]$tag
+sykdomspuls_obs_email_external <- function() {
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results)
+  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   results <- fd::tbl("spuls_standard_results") %>%
     dplyr::filter(granularity_time == "weekly") %>%
@@ -147,9 +147,9 @@ sykdomspuls_obs_email_external <- function(){
   for (em in emails) {
     a <- alerts[email %in% em]
 
-    r <- vector("list", length=nrow(a))
-    for(i in 1:nrow(a)){
-      r[[i]] <- results[stringr::str_detect(location_code,a$location[i]) & status %in% a$statuses[[i]]]
+    r <- vector("list", length = nrow(a))
+    for (i in 1:nrow(a)) {
+      r[[i]] <- results[stringr::str_detect(location_code, a$location[i]) & status %in% a$statuses[[i]]]
     }
     r <- rbindlist(r)
 
