@@ -15,3 +15,5 @@ CONFIG$db_config <- list(
   password = Sys.getenv("DB_PASSWORD", "example"),
   db = Sys.getenv("DB_DB", "sykdomspuls")
 )
+
+actions <- new.env()
