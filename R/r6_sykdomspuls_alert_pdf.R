@@ -17,7 +17,7 @@ sykdomspuls_alert_pdf <- R6::R6Class(
         return()
       }
 
-      if(actions[["sykdomspuls_alert_pdf"]]$can_perform_action()){
+      if (actions[["sykdomspuls_alert_pdf"]]$can_perform_action()) {
         sykdomspuls_std_alerts_pdf()
         actions[["sykdomspuls_alert_pdf"]]$action_performed()
       }
@@ -114,7 +114,7 @@ sykdomspuls_std_alerts_pdf <- function() {
     bcc = fd::e_emails(
       "sykdomspuls_emerg",
       is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
-      ),
+    ),
     attachments = attachments,
     is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
   )

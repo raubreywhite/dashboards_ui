@@ -26,7 +26,7 @@ normomo <- R6::R6Class(
       normomo_graphs()
 
       # send email
-      if(actions[["normomo_email"]]$can_perform_action()){
+      if (actions[["normomo_email"]]$can_perform_action()) {
         normomo_email_internal()
         normomo_email_ssi()
         actions[["normomo_email"]]$action_performed()
@@ -66,14 +66,14 @@ normomo_email_ssi <- function() {
     "Please find attached the current week's results.<br><br>",
     "Sincerely,<br><br>",
     "Norway"
-    )
+  )
 
   fd::mailgun(
     subject = glue::glue("[euromomo input] [Norway] [{stringr::str_replace(normomo_yrwk(), '-', ' ')}]"),
     html = html,
-    to = fd::e_emails("normomo_ssi", is_final=actions[["normomo_email"]]$is_final()),
+    to = fd::e_emails("normomo_ssi", is_final = actions[["normomo_email"]]$is_final()),
     attachments = file,
-    is_final=actions[["normomo_email"]]$is_final()
+    is_final = actions[["normomo_email"]]$is_final()
   )
 }
 
@@ -163,9 +163,9 @@ normomo_email_internal <- function() {
     subject = glue::glue("NorMOMO: Uke {normomo_yrwk()} d{fhi::nb$oe}dlighet"),
     html = html,
     to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("normomo_results", is_final=actions[["normomo_email"]]$is_final()),
+    bcc = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
     inlines = c(tab1, img1, img2),
-    is_final=actions[["normomo_email"]]$is_final()
+    is_final = actions[["normomo_email"]]$is_final()
   )
 }
 

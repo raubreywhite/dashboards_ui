@@ -9,5 +9,3 @@ normomo_yrwk <- function() {
 
   return(yrwk)
 }
-
-

@@ -17,7 +17,7 @@ sykdomspuls_obs <- R6::R6Class(
         return()
       }
 
-      if(actions[["sykdomspuls_obs"]]$can_perform_action()){
+      if (actions[["sykdomspuls_obs"]]$can_perform_action()) {
         sykdomspuls_obs_email_external()
         actions[["sykdomspuls_obs"]]$action_performed()
       }
@@ -215,4 +215,3 @@ sykdomspuls_obs_get_emails <- function() {
 
   return(retval)
 }
-
