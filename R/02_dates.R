@@ -7,7 +7,6 @@ normomo_yrwk <- function() {
   folder_res <- max(folder_res)
   yrwk <- fs::path_file(folder_res)
 
-  return(rnorm(1))
   return(yrwk)
 }
 
