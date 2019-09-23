@@ -1,5 +1,3 @@
-sykdomspuls_alert_pdf_production_days <- c(3:5)
-
 #' normomo
 #' @import R6
 #' @export sykdomspuls_alert_pdf
@@ -19,16 +17,9 @@ sykdomspuls_alert_pdf <- R6::R6Class(
         return()
       }
 
-      action <- fd::perform_action(
-        key="sykdomspuls_alert_pdf_email",
-        value=fhi::isoyearweek(sykdomspuls_date()),
-        dev_always_performs = TRUE,
-        production_days=sykdomspuls_alert_pdf_production_days,
-        first_date_of_production = "2019-09-21"
-      )
-      if(action$can_perform_action()){
+      if(actions[["sykdomspuls_alert_pdf"]]$can_perform_action()){
         sykdomspuls_std_alerts_pdf()
-        action$action_performed()
+        actions[["sykdomspuls_alert_pdf"]]$action_performed()
       }
 
       # update rundate
@@ -122,8 +113,9 @@ sykdomspuls_std_alerts_pdf <- function() {
     html = html,
     bcc = fd::e_emails(
       "sykdomspuls_emerg",
-      production_days = sykdomspuls_alert_pdf_production_days
+      is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
       ),
-    attachments = attachments
+    attachments = attachments,
+    is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
   )
 }

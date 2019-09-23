@@ -26,16 +26,10 @@ normomo <- R6::R6Class(
       normomo_graphs()
 
       # send email
-      action <- fd::perform_action(
-        key="normomo_email",
-        value=normomo_yrwk(),
-        dev_always_performs = TRUE,
-        first_date_of_production = "2019-09-21"
-      )
-      if(action$can_perform_action()){
+      if(actions[["normomo_email"]]$can_perform_action()){
         normomo_email_internal()
         normomo_email_ssi()
-        action$action_performed()
+        actions[["normomo_email"]]$action_performed()
       }
 
       # update rundate
@@ -48,14 +42,6 @@ normomo <- R6::R6Class(
     }
   )
 )
-
-normomo_yrwk <- function() {
-  folder_res <- fs::dir_ls(fd::path("results", package = "normomo"), regexp = "[0-9][0-9][0-9][0-9]-[0-9][0-9]$")
-  folder_res <- max(folder_res)
-  yrwk <- fs::path_file(folder_res)
-
-  return(yrwk)
-}
 
 normomo_write_results <- function() {
   fs::dir_create(fd::path("results", normomo_yrwk(), "data", package = "normomo"))
@@ -75,22 +61,19 @@ normomo_email_ssi <- function() {
   folder <- fs::dir_ls(folder, regexp = "COMPLETE")
   file <- fs::dir_ls(folder)
 
-  html <- glue::glue("
-    Dear EuroMOMO hub,
-
-    Please find attached the current week's results.
-
-    Sincerely,
-
-    Norway
-    ")
+  html <- glue::glue(
+    "Dear EuroMOMO hub,<br><br>",
+    "Please find attached the current week's results.<br><br>",
+    "Sincerely,<br><br>",
+    "Norway"
+    )
 
   fd::mailgun(
     subject = glue::glue("[euromomo input] [Norway] [{stringr::str_replace(normomo_yrwk(), '-', ' ')}]"),
     html = html,
-    to = fd::e_emails("normomo_ssi", production_days = normomo_production_days),
+    to = fd::e_emails("normomo_ssi", is_final=actions[["normomo_email"]]$is_final()),
     attachments = file,
-    production_days = normomo_production_days
+    is_final=actions[["normomo_email"]]$is_final()
   )
 }
 
@@ -180,8 +163,9 @@ normomo_email_internal <- function() {
     subject = glue::glue("NorMOMO: Uke {normomo_yrwk()} d{fhi::nb$oe}dlighet"),
     html = html,
     to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("normomo_results"),
-    inlines = c(tab1, img1, img2)
+    bcc = fd::e_emails("normomo_results", is_final=actions[["normomo_email"]]$is_final()),
+    inlines = c(tab1, img1, img2),
+    is_final=actions[["normomo_email"]]$is_final()
   )
 }
 

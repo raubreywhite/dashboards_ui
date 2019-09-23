@@ -1,5 +1,3 @@
-sykdomspuls_obs_production_days <- c(3:5)
-
 #' normomo
 #' @import R6
 #' @export sykdomspuls_obs
@@ -19,16 +17,9 @@ sykdomspuls_obs <- R6::R6Class(
         return()
       }
 
-      action <- fd::perform_action(
-        key="sykdomspuls_obs_email",
-        value=fhi::isoyearweek(sykdomspuls_date()),
-        dev_always_performs = TRUE,
-        production_days=sykdomspuls_obs_production_days,
-        first_date_of_production = "2019-09-21"
-      )
-      if(action$can_perform_action()){
+      if(actions[["sykdomspuls_obs"]]$can_perform_action()){
         sykdomspuls_obs_email_external()
-        action$action_performed()
+        actions[["sykdomspuls_obs"]]$action_performed()
       }
 
       # update rundate
@@ -86,7 +77,7 @@ sykdomspuls_obs_email_external <- function(){
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
-  alerts <- sykdomspuls::GetAlertsEmails()
+  alerts <- sykdomspuls_obs_get_emails()
   setDT(alerts)
   emails <- unique(alerts$email)
 
@@ -193,7 +184,8 @@ sykdomspuls_obs_email_external <- function(){
     fd::mailgun(
       subject = emailSubject,
       html = emailText,
-      to = em
+      to = em,
+      is_final = actions[["sykdomspuls_obs"]]$is_final()
     )
 
     Sys.sleep(1)
@@ -201,3 +193,26 @@ sykdomspuls_obs_email_external <- function(){
 
   return(0)
 }
+
+AlertsEmailConverter <- function(emails) {
+  setDT(emails)
+  emails[, statuses := vector("list", length = .N)]
+  emails[, statuses := rep(list(c("High", "Medium")), .N)]
+  emails[level == "high", statuses := rep(list(c("High")), .N)]
+
+  return(emails)
+}
+
+
+sykdomspuls_obs_get_emails <- function() {
+  if (fd::config$is_production & actions[["sykdomspuls_obs"]]$is_final()) {
+    retval <- readxl::read_excel(file.path("/etc", "gmailr", "emails_sykdomspuls_alert.xlsx"))
+  } else {
+    retval <- readxl::read_excel(file.path("/etc", "gmailr", "emails_sykdomspuls_alert_test.xlsx"))
+  }
+
+  retval <- AlertsEmailConverter(retval)
+
+  return(retval)
+}
+
