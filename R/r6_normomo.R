@@ -1,5 +1,3 @@
-normomo_production_days <- c(2, 3)
-
 #' normomo
 #' @import R6
 #' @export normomo
