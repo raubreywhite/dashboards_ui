@@ -40,7 +40,7 @@ normomo <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="ui_normomo",
+        package = "ui_normomo",
         date_extraction = rundate[package == "normomo"]$date_extraction,
         date_results = rundate[package == "normomo"]$date_results,
         date_run = lubridate::today()

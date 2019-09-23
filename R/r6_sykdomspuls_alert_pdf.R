@@ -33,7 +33,7 @@ sykdomspuls_alert_pdf <- R6::R6Class(
 
       # update rundate
       fd::update_rundate(
-        package="ui_sykdomspuls_alert_pdf",
+        package = "ui_sykdomspuls_alert_pdf",
         date_extraction = rundate[package == "sykdomspuls"]$date_extraction,
         date_results = rundate[package == "sykdomspuls"]$date_results,
         date_run = lubridate::today()
@@ -45,8 +45,8 @@ sykdomspuls_alert_pdf <- R6::R6Class(
 sykdomspuls_std_alerts_pdf <- function() {
   fd::msg("Sykdomspuls: creating alerts pdf", slack = T)
 
-  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package=="sykdomspuls"]$date_results)
-  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal==T]$tag
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results)
+  tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   d <- fd::tbl("spuls_standard_results") %>%
     dplyr::filter(granularity_time == "weekly") %>%
@@ -70,8 +70,8 @@ sykdomspuls_std_alerts_pdf <- function() {
     location_name = location_name
   )]
 
-  fs::dir_create(fd::path("results", sykdomspuls_date(), "standard", "alert_pdfs", package="sykdomspuls"))
-  d[, output_dir := fd::path("results", sykdomspuls_date(), "standard", "alert_pdfs", package="sykdomspuls")]
+  fs::dir_create(fd::path("results", sykdomspuls_date(), "standard", "alert_pdfs", package = "sykdomspuls"))
+  d[, output_dir := fd::path("results", sykdomspuls_date(), "standard", "alert_pdfs", package = "sykdomspuls")]
   d[, attachment := fs::path(output_dir, output_file)]
 
   for (i in 1:nrow(d)) {
@@ -116,6 +116,7 @@ sykdomspuls_std_alerts_pdf <- function() {
   attachments <- d$attachment
   if (length(attachments) > 10) attachments <- attachments[1:10]
 
+
   fd::mailgun(
     subject = "Sykdomspuls alert pdfs",
     html = html,
@@ -126,4 +127,3 @@ sykdomspuls_std_alerts_pdf <- function() {
     attachments = attachments
   )
 }
-

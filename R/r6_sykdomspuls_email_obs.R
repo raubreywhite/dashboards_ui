@@ -201,6 +201,3 @@ sykdomspuls_obs_email_external <- function(){
 
   return(0)
 }
-
-
-
