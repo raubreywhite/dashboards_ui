@@ -19,7 +19,10 @@ Imports:
   gridExtra,
   huxtable,
   writexl,
-  sykdomspuls
+  sykdomspuls,
+  ggplot2,
+  readxl,
+  stringr
 Suggests:
   testthat,
     knitr,
