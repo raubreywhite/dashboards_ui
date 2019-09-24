@@ -29,7 +29,8 @@
       first_date_of_production = "2019-09-21"
     )
   },
-  error=function(e){
+  error = function(e) {
     fd::msg("No database available")
-  })
+  }
+  )
 }
