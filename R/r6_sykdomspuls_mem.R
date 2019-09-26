@@ -19,14 +19,11 @@ sykdomspuls_mem <- R6::R6Class(
       }
 
       # write results as excel file
-      mem_schema <- sykdomspuls::get_mem_schema()
-      mem_schema$db_connect(sykdomspuls::CONFIG$DB_CONFIG)
+   
       for(i in 1:nrow(sykdomspuls::CONFIG$MEM)){
         conf <- sykdomspuls::CONFIG$MEM[i]
-        print(rundate[package == "sykdomspuls"]$date_extraction)
         if(conf$create_plots){
-          create_mem_output(conf, rundate[package == "sykdomspuls"]$date_extraction,
-                            mem_schema=mem_schema)
+          create_mem_output(conf, rundate[package == "sykdomspuls"]$date_extraction)
 
         }
 
@@ -48,33 +45,24 @@ sykdomspuls_mem <- R6::R6Class(
 #' create MEM season plots
 #'
 #' @param conf A mem model configuration object
-#' @param mem_schema mem schema
+#' @param date extract date
 #'
-#' @export create_mem_output
-create_mem_output <- function(conf,date, mem_schema = NULL) {
-  if (is.null(mem_schema)) {
-    mem_schema <- sykdomspuls::get_mem_schema()
-    mem_schema$db_connect(sykdomspuls::CONFIG$DB_CONFIG)
-  }
-  current_season <- mem_schema$dplyr_tbl() %>%
+create_mem_output <- function(conf, date) {
+
+  current_season <-fd::tbl("spuls_mem_results") %>%
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
   current_season <- current_season$season
   x_tag <- conf$tag
-  data <- mem_schema$get_data_db(season == current_season & tag == x_tag)
+  data <- fd::tbl("spuls_mem_results") %>%
+    dplyr::filter(season == current_season & tag == x_tag) %>%
+    dplyr::collect()
   setDT(data)
-  folder <- fd::path("results", sprintf(
-    "%s/%s", date,
-    paste("mem", conf$tag, sep = "_"),
-    package="ui"
-  ))
-  if (!file.exists(folder)) {
-    if(!file.exists(dirname(folder))){
-      dir.create(dirname(folder))
-
-    }
-    dir.create(folder)
-  }
+  folder <- fd::path("results",
+                     date,
+                     glue::glue("mem_{x_tag}")
+                     )
+  fs::dir_create(folder)
 
   out_data <- data %>%
     dplyr::mutate(
@@ -125,11 +113,11 @@ create_mem_output <- function(conf,date, mem_schema = NULL) {
     data_location <- data[location_code == loc]
 
     chart <- fhiplot::make_influenza_threshold_chart(data_location, "",
-      weeks = c(30, 20),
+      weeks = c(35, 20),
       color_palette = "influensa", legend_control = "text"
     )
 
-    filename <- glue::glue("{folder}/{loc}.png")
+    filename <- fs::path(folder, glue::glue("{fhi::get_location_name(loc)}.png"))
 
     ggsave(filename, chart, height = 7, width = 9)
   }
@@ -242,8 +230,8 @@ create_mem_output <- function(conf,date, mem_schema = NULL) {
       coord_map(projection = "conic", par = 55)
 
 
-    filename <- paste(folder, "/map_week", xyrwk, ".png", sep = "")
-    filename_legend <- paste(folder, "/map_week", xyrwk, "legend.png", sep = "")
+    filename <- fs::path(folder, glue::glue("map_week_{xyrwk}.png"))
+    filename_legend <- fs::path(folder, glue::glue("map_week_{xyrwk}_legend.png"))
     png(filename, width = 7, height = 6, units = "in", res = 800)
     grid::grid.newpage()
     vpb_ <- grid::viewport(width = 1, height = 1, x = 0.5, y = 0.5) # the larger map
