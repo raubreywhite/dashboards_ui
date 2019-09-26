@@ -2,8 +2,10 @@
 
 export("%>%")
 export(actions)
+export(create_mem_output)
 export(normomo)
 export(sykdomspuls_alert_pdf)
+export(sykdomspuls_mem)
 export(sykdomspuls_obs)
 import(R6)
 import(data.table)
