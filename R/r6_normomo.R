@@ -416,7 +416,7 @@ GraphTogether <- function(
     values = c("Korrigert" = "black", "Rapporterte" = "red"),
     labels = colourlabels
   )
-  q <- q + labs(caption=caption)
+  q <- q + labs(caption = caption)
   q <- q + fhiplot::theme_fhi_lines(base_size = 18)
   q <- q + fhiplot::set_x_axis_vertical()
   # q <- q + theme(panel.grid.major = element_line(colour = "white"),
