@@ -10,7 +10,7 @@ sykdomspuls_mem <- R6::R6Class(
       # check to see if it can run
       rundate <- fd::get_rundate()
       run <- TRUE
-      
+
       if ("ui_sykdomspuls_mem" %in% rundate$package) {
         if (rundate[package == "ui_sykdomspuls_mem"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
       }
@@ -19,14 +19,12 @@ sykdomspuls_mem <- R6::R6Class(
       }
 
       # write results as excel file
-   
-      for(i in 1:nrow(sykdomspuls::CONFIG$MEM)){
+
+      for (i in 1:nrow(sykdomspuls::CONFIG$MEM)) {
         conf <- sykdomspuls::CONFIG$MEM[i]
-        if(conf$create_plots){
+        if (conf$create_plots) {
           create_mem_output(conf, rundate[package == "sykdomspuls"]$date_extraction)
-
         }
-
       }
 
       # update rundate
@@ -48,8 +46,7 @@ sykdomspuls_mem <- R6::R6Class(
 #' @param date extract date
 #'
 create_mem_output <- function(conf, date) {
-
-  current_season <-fd::tbl("spuls_mem_results") %>%
+  current_season <- fd::tbl("spuls_mem_results") %>%
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
   current_season <- current_season$season
@@ -58,10 +55,11 @@ create_mem_output <- function(conf, date) {
     dplyr::filter(season == current_season & tag == x_tag) %>%
     dplyr::collect()
   setDT(data)
-  folder <- fd::path("results",
-                     date,
-                     glue::glue("mem_{x_tag}")
-                     )
+  folder <- fd::path(
+    "results",
+    date,
+    glue::glue("mem_{x_tag}")
+  )
   fs::dir_create(folder)
 
   out_data <- data %>%
@@ -88,15 +86,17 @@ create_mem_output <- function(conf, date) {
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
   rate_df <- overview %>% dplyr::select("År-Uke", dplyr::ends_with("% ILI"))
-  consult_df <-overview %>% dplyr::select("År-Uke", dplyr::ends_with("konsultasjoner"))
+  consult_df <- overview %>% dplyr::select("År-Uke", dplyr::ends_with("konsultasjoner"))
   xlsx::addDataFrame(rate_df,
-               sheet_rate,
-               row.names = FALSE)
-  xlsx::autoSizeColumn(sheet_rate, colIndex=1:ncol(rate_df))
+    sheet_rate,
+    row.names = FALSE
+  )
+  xlsx::autoSizeColumn(sheet_rate, colIndex = 1:ncol(rate_df))
   xlsx::addDataFrame(consult_df,
-               sheet_consult,
-               row.names = FALSE)
-  xlsx::autoSizeColumn(sheet_consult, colIndex=1:ncol(consult_df))
+    sheet_consult,
+    row.names = FALSE
+  )
+  xlsx::autoSizeColumn(sheet_consult, colIndex = 1:ncol(consult_df))
   info <- data.frame(
     Syndrom = conf$tag,
     ICPC2 = paste(conf$icpc2, sep = ","),
@@ -104,11 +104,12 @@ create_mem_output <- function(conf, date) {
     Oppdatert = date
   )
   xlsx::addDataFrame(info,
-               sheet_info,
-               row.names = FALSE)
-  xlsx::autoSizeColumn(sheet_info, colIndex=1:ncol(info))
+    sheet_info,
+    row.names = FALSE
+  )
+  xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/fylke.xlsx"))
-  
+
   for (loc in unique(data[, location_code])) {
     data_location <- data[location_code == loc]
 
