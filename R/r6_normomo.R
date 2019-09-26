@@ -176,9 +176,9 @@ normomo_graphs <- function() {
 
   locs <- c("norge", unique(fhidata::norway_locations_current$county_code))
 
-  pb <- RAWmisc::ProgressBarCreate(min = 0, max = length(locs), flush = TRUE)
+  pb <- fhi::txt_progress_bar(min = 0, max = length(locs))
   for (i in seq_along(locs)) {
-    RAWmisc::ProgressBarSet(pb, i)
+    setTxtProgressBar(pb, i)
     loc_code <- locs[i]
 
     data <- fd::tbl("normomo_standard_results") %>%
@@ -239,29 +239,21 @@ normomo_graphs_deaths <- function(
       titleBias <- "Bias i korrigering av antall d\u00F8de (65+ \u00E5r) per uke"
     }
 
-    q <- gridExtra::grid.arrange(
-      GraphTogether(
-        data = data[age == i],
-        title1 = title1,
-        title2 = title2,
-        includeRealDeaths = FALSE
-      ),
-      ncol = 1,
-      newpage = F,
-      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
+    q <- GraphTogether(
+      data = data[age == i],
+      title1 = title1,
+      title2 = title2,
+      includeRealDeaths = FALSE,
+      caption = paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = "")
     )
     fhiplot::save_a4(q, filename = paste0(folder, "/excl_reported_", runName, "-", i, "-", normomo_yrwk(), ".png"))
 
-    q <- gridExtra::grid.arrange(
-      GraphTogether(
-        data = data[age == i],
-        title1 = title1,
-        title2 = title2,
-        includeRealDeaths = TRUE
-      ),
-      ncol = 1,
-      newpage = F,
-      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = ""))
+    q <- GraphTogether(
+      data = data[age == i],
+      title1 = title1,
+      title2 = title2,
+      includeRealDeaths = TRUE,
+      caption = paste("Sist oppdatert: ", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y"), sep = "")
     )
     fhiplot::save_a4(q, filename = paste0(folder, "/incl_reported_", runName, "-", i, "-", normomo_yrwk(), ".png"))
   }
@@ -327,7 +319,8 @@ GraphTogether <- function(
                           title1a = NULL,
                           title1b = NULL,
                           title2,
-                          includeRealDeaths = FALSE) {
+                          includeRealDeaths = FALSE,
+                          caption = "") {
   if (!is.null(title1)) {
     plottingData1 <- data[wk >= max(wk) - 52]
     plottingData2 <- data[wk >= max(wk) - 52 * 5 + 1]
@@ -424,6 +417,7 @@ GraphTogether <- function(
     values = c("Korrigert" = "black", "Rapporterte" = "red"),
     labels = colourlabels
   )
+  q <- q + labs(caption=caption)
   q <- q + fhiplot::theme_fhi_lines(base_size = 18)
   q <- q + fhiplot::set_x_axis_vertical()
   # q <- q + theme(panel.grid.major = element_line(colour = "white"),
