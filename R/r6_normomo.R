@@ -25,7 +25,7 @@ normomo <- R6::R6Class(
 
       # send email
       if (actions[["normomo_email"]]$can_perform_action()) {
-        normomo_email_internal()
+        normomo_email_results()
         normomo_email_ssi()
         actions[["normomo_email"]]$action_performed()
       }
@@ -75,8 +75,7 @@ normomo_email_ssi <- function() {
   )
 }
 
-
-normomo_email_internal <- function() {
+normomo_email_results <- function() {
   d <- fd::tbl("normomo_standard_results") %>%
     dplyr::filter(location_code == "norge") %>%
     dplyr::filter(age == "Total") %>%
