@@ -5,6 +5,14 @@
   )
 
   tryCatch({
+    actions[["weather_download"]] <- fd::action$new(
+      key = "ui_weather_download",
+      value = lubridate::today(),
+      dev_always_performs = TRUE,
+      production_days = c(1:7),
+      first_date_of_production = "2019-09-21"
+    )
+
     actions[["sykdomspuls_obs"]] <- fd::action$new(
       key = "ui_sykdomspuls_obs",
       value = fhi::isoyearweek(sykdomspuls_date()),
@@ -14,7 +22,7 @@
     )
 
     actions[["sykdomspuls_alert_pdf"]] <- fd::action$new(
-      key = "sykdomspuls_alert_pdf",
+      key = "ui_sykdomspuls_alert_pdf",
       value = fhi::isoyearweek(sykdomspuls_date()),
       dev_always_performs = TRUE,
       production_days = c(3:5),
@@ -22,10 +30,18 @@
     )
 
     actions[["normomo_email"]] <- fd::action$new(
-      key = "normomo_email",
+      key = "ui_normomo_email",
       value = normomo_yrwk(),
       dev_always_performs = TRUE,
       production_days = c(2:3),
+      first_date_of_production = "2019-09-21"
+    )
+
+    actions[["amort"]] <- fd::action$new(
+      key = "ui_amort_email",
+      value = normomo_yrwk(),
+      dev_always_performs = TRUE,
+      production_days = c(3,4),
       first_date_of_production = "2019-09-21"
     )
   },
