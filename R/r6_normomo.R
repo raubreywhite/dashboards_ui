@@ -182,7 +182,7 @@ normomo_email_results <- function() {
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "<b>Figur 1.</b> Totalt antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret ({fhi::nb$oe}verst) og de siste 5 {fhi::nb$aa}rene (nederst), alle aldersgrupper.<br><br>",
     "<img src='cid:{img1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
-    "<b>Figur 2.</b> Antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} fylke og aldersgruppe.<br><br>",
+    "<b>Figur 2.</b> Antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} fylke.<br><br>",
     "<img src='cid:{img2_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "</html>"
   )
@@ -293,7 +293,7 @@ normomo_graphs_deaths <- function(
 
 normomo_tiles <- function(folder) {
   allResults <- fd::tbl("normomo_standard_results") %>%
-    dplyr::filter(age == "Total" | location_code == "norge") %>%
+    dplyr::filter(age == "Total") %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
@@ -318,9 +318,8 @@ normomo_tiles <- function(folder) {
   pretty_labs <- unique(plotData[, c("location_name", "age")])
   setorder(pretty_labs, -location_name, age)
   pretty_labs[, pretty_cat := glue::glue(
-    "{location_name} ({age})",
-    location_name = location_name,
-    age = age
+    "{location_name}",
+    location_name = location_name
   )]
   pretty_labs[, pretty_cat := factor(pretty_cat, levels = pretty_cat)]
 
