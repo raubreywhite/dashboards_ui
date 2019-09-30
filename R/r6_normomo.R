@@ -217,7 +217,7 @@ normomo_graphs <- function() {
 
   pb <- fhi::txt_progress_bar(min = 0, max = length(locs))
   for (i in seq_along(locs)) {
-    setTxtProgressBar(pb, i)
+    utils::setTxtProgressBar(pb, i)
     loc_code <- locs[i]
 
     data <- fd::tbl("normomo_standard_results") %>%

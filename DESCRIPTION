@@ -22,7 +22,12 @@ Imports:
   sykdomspuls,
   ggplot2,
   readxl,
-  stringr
+  stringr,
+  grDevices,
+  cowplot,
+  ggpubr,
+  lubridate,
+  xlsx
 Suggests:
   testthat,
     knitr,
