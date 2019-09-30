@@ -55,11 +55,8 @@ create_mem_output <- function(conf, date) {
     dplyr::filter(season == current_season & tag == x_tag) %>%
     dplyr::collect()
   setDT(data)
-  folder <- fd::path(
-    "results",
-    date,
-    glue::glue("mem_{x_tag}")
-  )
+
+  folder <- fd::results_folder(glue::glue("mem_{x_tag}"), date)
   fs::dir_create(folder)
 
   out_data <- data %>%
@@ -242,4 +239,6 @@ create_mem_output <- function(conf, date) {
     dev.off()
     ggsave(filename_legend, ggpubr::as_ggplot(legend), height = 3, width = 3)
   }
+
+  fd::create_latest_folder(glue::glue("mem_{x_tag}"), date)
 }
