@@ -82,8 +82,8 @@ create_mem_output <- function(conf, date) {
   sheet_rate <- xlsx::createSheet(wb, sheetName = "Andel ILI")
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  rate_df <- overview %>% dplyr::select("\u00C5rr-Uke", dplyr::ends_with("% ILI"))
-  consult_df <- overview %>% dplyr::select("\u00C5rr-Uke", dplyr::ends_with("konsultasjoner"))
+  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", dplyr::ends_with("% ILI"))
+  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", dplyr::ends_with("konsultasjoner"))
   xlsx::addDataFrame(rate_df,
     sheet_rate,
     row.names = FALSE
