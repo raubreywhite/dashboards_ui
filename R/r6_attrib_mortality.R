@@ -19,10 +19,9 @@ amort <- R6::R6Class(
       }
 
       # send email
-      if (actions[["ui_amort"]]$can_perform_action()) {
+      if (actions[["amort"]]$can_perform_action()) {
         amort_email_results()
-        normomo_email_ssi()
-        actions[["ui_amort"]]$action_performed()
+        actions[["amort"]]$action_performed()
       }
 
       # update rundate
@@ -36,7 +35,7 @@ amort <- R6::R6Class(
   )
 )
 
-amort_table <- function(){
+amort_email_results <- function(){
   weather <- fd::get_weather()
   weather <- weather[,.(
     tx_mean=mean(tx),

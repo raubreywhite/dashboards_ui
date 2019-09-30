@@ -7,6 +7,8 @@ weather_download$new()$run_all()
 
 sykdomspuls_mem$new()$run_all()
 
+amort$new()$run_all()
+
 normomo$new()$run_all()
 
 sykdomspuls_alert_pdf$new()$run_all()
