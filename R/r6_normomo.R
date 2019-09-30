@@ -107,7 +107,7 @@ normomo_email_results <- function() {
   index_med <- which(d$status == "medium") + 1
   index_hig <- which(d$status == "high") + 1
 
-  for(col in 1:6){
+  for (col in 1:6) {
     huxtable::background_color(tab)[-1, col] <- fhiplot::warning_color["low"]
     huxtable::background_color(tab)[index_med, col] <- fhiplot::warning_color["med"]
     huxtable::background_color(tab)[index_hig, col] <- fhiplot::warning_color["hig"]
@@ -127,7 +127,7 @@ normomo_email_results <- function() {
   tab <- huxtable::merge_cells(tab, 1, 7:9)
   tab[1, 7] <- "D\u00F8delighetsniv\u00E5"
 
-  nr0 <- nrow(tab)+1
+  nr0 <- nrow(tab) + 1
 
   huxtable::width(tab) <- 0.8
 
@@ -137,7 +137,7 @@ normomo_email_results <- function() {
     "\\textsuperscript{3}Antall forventede d{fhi::nb$oe}dsfall basert p{fhi::nb$aa} historiske data\\\\*",
     "\\textsuperscript{4}Differansen mellom antall forventede og antall korrigerte d{fhi::nb$oe}dsfall\\\\*",
     "\\textsuperscript{5}Standardavvik (n{fhi::nb$aa}r z-score $\\ge$ 2,0 regnes overd{fhi::nb$oe}deligheten som signifikant)"
-    ), border = 0)
+  ), border = 0)
 
 
   nr1 <- nrow(tab)
@@ -145,10 +145,10 @@ normomo_email_results <- function() {
   huxtable::escape_contents(tab)[nr0:nr1, ] <- F
   huxtable::escape_contents(tab)[2, 2:6] <- F
 
-  huxtable::left_border_style(tab)[2:(nr0-1),2] <- "double"
-  huxtable::left_border_style(tab)[2:(nr0),7] <- "double"
+  huxtable::left_border_style(tab)[2:(nr0 - 1), 2] <- "double"
+  huxtable::left_border_style(tab)[2:(nr0), 7] <- "double"
 
-#tab
+  # tab
 
   tab1_name <- "table1.png"
   tab1 <- fs::path(fhi::temp_dir(), tab1_name)
@@ -233,7 +233,7 @@ normomo_graphs <- function() {
   }
 
   normomo_tiles(folder)
-  #normomo_tiles_age(folder)
+  # normomo_tiles_age(folder)
 }
 
 normomo_graphs_deaths <- function(
@@ -319,21 +319,21 @@ normomo_tiles <- function(folder) {
 
   plotData[, age := factor(
     age,
-    levels=c("0to4","5to14","15to64","65P","Total"),
-    labels=c("0-4","5-14","15-64","65+","Totalt")
+    levels = c("0to4", "5to14", "15to64", "65P", "Total"),
+    labels = c("0-4", "5-14", "15-64", "65+", "Totalt")
   )]
   plotData[, location_name := factor(location_name, levels = fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name)]
 
-  pretty_labs <- unique(plotData[,c("location_name","age")])
-  setorder(pretty_labs,-location_name,age)
-  pretty_labs[,pretty_cat:=glue::glue(
+  pretty_labs <- unique(plotData[, c("location_name", "age")])
+  setorder(pretty_labs, -location_name, age)
+  pretty_labs[, pretty_cat := glue::glue(
     "{location_name} ({age})",
-    location_name=location_name,
-    age=age
-    )]
-  pretty_labs[,pretty_cat:=factor(pretty_cat,levels=pretty_cat)]
+    location_name = location_name,
+    age = age
+  )]
+  pretty_labs[, pretty_cat := factor(pretty_cat, levels = pretty_cat)]
 
-  plotData[pretty_labs,on=c("location_name","age"),pretty_cat:=pretty_cat]
+  plotData[pretty_labs, on = c("location_name", "age"), pretty_cat := pretty_cat]
 
   plotColours <- plotData[1:4]
   # plotColours[1,status:="4lower"]
@@ -345,12 +345,12 @@ normomo_tiles <- function(folder) {
   q <- q + geom_tile(colour = "black")
   q <- q + geom_tile(data = plotColours, alpha = 0)
   q <- q + scale_fill_manual("",
-                             values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
-                             labels = c(
-                               "Betydelig forh\u00F8yet",
-                               "Forh\u00F8yet",
-                               "Normalt"
-                             )
+    values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
+    labels = c(
+      "Betydelig forh\u00F8yet",
+      "Forh\u00F8yet",
+      "Normalt"
+    )
   )
   q <- q + labs(title = "Antall d\u00F8de per uke siste \u00E5r")
   q <- q + scale_x_discrete("\u00C5r-uke", expand = c(0, 0))
@@ -387,9 +387,9 @@ normomo_tiles_age <- function(folder) {
   plotData[, location_name := factor(location_name, levels = rev(fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name))]
   plotData[, age := factor(
     age,
-    levels=c("0to4","5to14","15to64","65P","Total"),
-    labels=c("0 - 4","5 - 14","15 - 64","65+","Totalt")
-    )]
+    levels = c("0to4", "5to14", "15to64", "65P", "Total"),
+    labels = c("0 - 4", "5 - 14", "15 - 64", "65+", "Totalt")
+  )]
 
   plotColours <- plotData[1:4]
   # plotColours[1,status:="4lower"]
@@ -401,12 +401,12 @@ normomo_tiles_age <- function(folder) {
   q <- q + geom_tile(colour = "black")
   q <- q + geom_tile(data = plotColours, alpha = 0)
   q <- q + scale_fill_manual("",
-                             values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
-                             labels = c(
-                               "Betydelig forh\u00F8yet",
-                               "Forh\u00F8yet",
-                               "Normalt"
-                             )
+    values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
+    labels = c(
+      "Betydelig forh\u00F8yet",
+      "Forh\u00F8yet",
+      "Normalt"
+    )
   )
   q <- q + labs(title = glue::glue("Totalt antall d\u00F8de per uke siste \u00E5r i Norge"))
   q <- q + scale_x_discrete("\u00C5r-uke", expand = c(0, 0))

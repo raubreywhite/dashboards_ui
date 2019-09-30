@@ -35,12 +35,12 @@ amort <- R6::R6Class(
   )
 )
 
-amort_email_results <- function(){
+amort_email_results <- function() {
   weather <- fd::get_weather()
-  weather <- weather[,.(
-    tx_mean=mean(tx),
-    tn_mean=mean(tn)
-  ),keyby=.(
+  weather <- weather[, .(
+    tx_mean = mean(tx),
+    tn_mean = mean(tn)
+  ), keyby = .(
     location_code,
     yrwk
   )]
@@ -58,16 +58,16 @@ amort_email_results <- function(){
   setorder(d, -wk)
   d <- d[1:10]
 
-  d[weather, on=c("yrwk","location_code"), tx_mean:=tx_mean]
-  d[weather, on=c("yrwk","location_code"), tn_mean:=tn_mean]
-  d[mem, on =c("yrwk","location_code"), ils_rate:=rate]
-  d[mem, on =c("yrwk","location_code"), ils_status:=i.status]
+  d[weather, on = c("yrwk", "location_code"), tx_mean := tx_mean]
+  d[weather, on = c("yrwk", "location_code"), tn_mean := tn_mean]
+  d[mem, on = c("yrwk", "location_code"), ils_rate := rate]
+  d[mem, on = c("yrwk", "location_code"), ils_status := i.status]
 
   tab <- huxtable::hux(
     "\u00C5r-uke" = d$yrwk,
     "Overd\u00F8dlighet\\textsuperscript{1}" = round(d$excessp),
-    "Min" = fhiplot::format_nor(d$tn_mean,1),
-    "Maks" = fhiplot::format_nor(d$tx_mean,1),
+    "Min" = fhiplot::format_nor(d$tn_mean, 1),
+    "Maks" = fhiplot::format_nor(d$tx_mean, 1),
     "\\%" = fhiplot::format_nor(d$ils_rate, 2),
     "Status" = d$ils_status
   ) %>%
@@ -83,7 +83,7 @@ amort_email_results <- function(){
   index_med <- which(d$status == "medium") + 1
   index_hig <- which(d$status == "high") + 1
 
-  for(col in 2:2){
+  for (col in 2:2) {
     huxtable::background_color(tab)[-1, col] <- fhiplot::warning_color["low"]
     huxtable::background_color(tab)[index_med, col] <- fhiplot::warning_color["med"]
     huxtable::background_color(tab)[index_hig, col] <- fhiplot::warning_color["hig"]
@@ -100,7 +100,7 @@ amort_email_results <- function(){
   tab <- huxtable::merge_cells(tab, 1, 5:6)
   tab[1, 5] <- "ILS\\textsuperscript{3}"
 
-  nr0 <- nrow(tab)+1
+  nr0 <- nrow(tab) + 1
 
   tab <- huxtable::add_footnote(tab, glue::glue(
     "\\textsuperscript{1}Differansen mellom antall forventede og antall korrigerte d{fhi::nb$oe}dsfall\\\\*",
@@ -113,15 +113,15 @@ amort_email_results <- function(){
   huxtable::escape_contents(tab)[nr0:nr1, ] <- F
   huxtable::escape_contents(tab)[1:2, ] <- F
 
-  huxtable::left_border_style(tab)[,3] <- "double"
-  huxtable::left_border_style(tab)[,5] <- "double"
+  huxtable::left_border_style(tab)[, 3] <- "double"
+  huxtable::left_border_style(tab)[, 5] <- "double"
 
   huxtable::width(tab) <- 0.8
 
-  #tab
+  # tab
   tab1_name <- "table1.png"
   tab1 <- fs::path(fhi::temp_dir(), tab1_name)
-  #tab1 <- fs::path("/git", tab1_name)
+  # tab1 <- fs::path("/git", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
 
   html <- glue::glue(
@@ -140,5 +140,4 @@ amort_email_results <- function(){
     inlines = c(tab1),
     is_final = actions[["amort"]]$is_final()
   )
-
 }

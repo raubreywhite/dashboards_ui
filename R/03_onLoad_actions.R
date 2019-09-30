@@ -41,7 +41,7 @@
       key = "ui_amort_email",
       value = normomo_yrwk(),
       dev_always_performs = TRUE,
-      production_days = c(3,4),
+      production_days = c(3, 4),
       first_date_of_production = "2019-09-21"
     )
   },
