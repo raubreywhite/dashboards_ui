@@ -4,12 +4,12 @@
 \alias{create_mem_output}
 \title{create MEM season plots}
 \usage{
-create_mem_output(conf, mem_schema = NULL)
+create_mem_output(conf, date)
 }
 \arguments{
 \item{conf}{A mem model configuration object}
 
-\item{mem_schema}{mem schema}
+\item{date}{extract date}
 }
 \description{
 create MEM season plots
