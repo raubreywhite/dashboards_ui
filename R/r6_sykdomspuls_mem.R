@@ -74,7 +74,7 @@ create_mem_output <- function(conf, date) {
   col_names <- gsub("rate_([A-\u00D8a-\u00F80-9-]*)$", "\\1 % ILI", col_names)
   col_names <- gsub("n_([A-\u00D8a-\u00F80-9-]*)$", "\\1 ILI konsultasjoner", col_names)
   col_names <- gsub("denominator_([A-\u00D8a-\u00F80-9-]*)$", "\\1 Totalt konsultasjoner", col_names)
-  col_names <- gsub("yrwk$", "År-Uke", col_names)
+  col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
 
   names(overview) <- col_names
   setcolorder(overview, col_names[order(col_names)])
@@ -82,8 +82,8 @@ create_mem_output <- function(conf, date) {
   sheet_rate <- xlsx::createSheet(wb, sheetName = "Andel ILI")
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  rate_df <- overview %>% dplyr::select("År-Uke", dplyr::ends_with("% ILI"))
-  consult_df <- overview %>% dplyr::select("År-Uke", dplyr::ends_with("konsultasjoner"))
+  rate_df <- overview %>% dplyr::select("\u00C5rr-Uke", dplyr::ends_with("% ILI"))
+  consult_df <- overview %>% dplyr::select("\u00C5rr-Uke", dplyr::ends_with("konsultasjoner"))
   xlsx::addDataFrame(rate_df,
     sheet_rate,
     row.names = FALSE
@@ -192,17 +192,17 @@ create_mem_output <- function(conf, date) {
       geom_text(data = cnames_country, aes(long, lat, label = rate), size = 2.3) +
       geom_text(
         data = data.frame(
-          text = c(glue::glue("Uke {week_string}")),
+          txt = c(glue::glue("Uke {week_string}")),
           lat = c(70), long = c(6)
         ),
-        aes(long, lat, label = text), size = 6
+        aes(long, lat, label = txt), size = 6
       ) +
       geom_text(
         data = data.frame(
-          text = c(glue::glue('Oppdatert {strftime(as.Date(date), format="%d.%m.%Y")}')),
+          txt = c(glue::glue('Oppdatert {strftime(as.Date(date), format="%d.%m.%Y")}')),
           lat = c(58), long = c(20)
         ),
-        aes(long, lat, label = text), size = 3
+        aes(long, lat, label = txt), size = 3
       ) +
       coord_map(projection = "conic", par = 55)
     legend <- cowplot::get_legend(map_plot)
@@ -230,13 +230,13 @@ create_mem_output <- function(conf, date) {
 
     filename <- fs::path(folder, glue::glue("map_week_{xyrwk}.png"))
     filename_legend <- fs::path(folder, glue::glue("map_week_{xyrwk}_legend.png"))
-    png(filename, width = 7, height = 6, units = "in", res = 800)
+    grDevices::png(filename, width = 7, height = 6, units = "in", res = 800)
     grid::grid.newpage()
     vpb_ <- grid::viewport(width = 1, height = 1, x = 0.5, y = 0.5) # the larger map
     vpa_ <- grid::viewport(width = 0.3, height = 0.3, x = 0.6, y = 0.3)
     print(map_plot + theme(legend.position = "none"), vp = vpb_)
     print(oslo_akershus, vp = vpa_)
-    dev.off()
+    grDevices::dev.off()
     ggsave(filename_legend, ggpubr::as_ggplot(legend), height = 3, width = 3)
   }
 

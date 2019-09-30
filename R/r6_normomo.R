@@ -25,7 +25,7 @@ normomo <- R6::R6Class(
 
       # send email
       if (actions[["normomo_email"]]$can_perform_action()) {
-        normomo_email_internal()
+        normomo_email_results()
         normomo_email_ssi()
         actions[["normomo_email"]]$action_performed()
       }
@@ -75,8 +75,7 @@ normomo_email_ssi <- function() {
   )
 }
 
-
-normomo_email_internal <- function() {
+normomo_email_results <- function() {
   d <- fd::tbl("normomo_standard_results") %>%
     dplyr::filter(location_code == "norge") %>%
     dplyr::filter(age == "Total") %>%
@@ -87,13 +86,14 @@ normomo_email_internal <- function() {
 
   tab <- huxtable::hux(
     "\u00C5r-uke" = d$yrwk,
-    "Intet" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
-    "Lav" = glue::glue("{round(d$thresholdp_1)} - {round(d$thresholdp_2)}"),
-    "H\u00F8y" = glue::glue(">{round(d$thresholdp_2)}"),
-    "Reg." = d$nb,
-    "Kor." = round(d$nbc),
-    "Over." = round(d$excessp),
-    "Z-score" = fhiplot::format_nor(d$zscore, 2)
+    "Registrert\\textsuperscript{1}" = d$nb,
+    "Korrigert\\textsuperscript{2}" = round(d$nbc),
+    "Forventet\\textsuperscript{3}" = round(d$Pnb),
+    "Overd\u00F8dlighet\\textsuperscript{4}" = round(d$excessp),
+    "Z-score\\textsuperscript{5}" = fhiplot::format_nor(d$zscore, 2),
+    "Normalt" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
+    "Forh\u00F8yet" = glue::glue("{round(d$thresholdp_1)} - {round(d$thresholdp_2)}"),
+    "Betydelig forh\u00F8yet" = glue::glue(">{round(d$thresholdp_2)}")
   ) %>%
     huxtable::add_colnames() %>%
     fhiplot::huxtable_theme_fhi_basic() %>%
@@ -103,23 +103,52 @@ normomo_email_internal <- function() {
     huxtable::set_left_padding(huxtable::everywhere, huxtable::everywhere, 0.1) %>%
     huxtable::set_right_padding(huxtable::everywhere, huxtable::everywhere, 0.1)
 
-  huxtable::background_color(tab)[-1, 7] <- fhiplot::warning_color["low"]
-  huxtable::background_color(tab)[which(d$status == "medium") + 1, 7] <- fhiplot::warning_color["med"]
-  huxtable::background_color(tab)[which(d$status == "high") + 1, 7] <- fhiplot::warning_color["hig"]
+  index_low <- which(d$status == "normal") + 1
+  index_med <- which(d$status == "medium") + 1
+  index_hig <- which(d$status == "high") + 1
 
-  huxtable::background_color(tab)[which(d$status == "normal") + 1, 2] <- fhiplot::warning_color["low"]
-  huxtable::background_color(tab)[which(d$status == "medium") + 1, 3] <- fhiplot::warning_color["med"]
-  huxtable::background_color(tab)[which(d$status == "high") + 1, 4] <- fhiplot::warning_color["hig"]
+  for(col in 1:6){
+    huxtable::background_color(tab)[-1, col] <- fhiplot::warning_color["low"]
+    huxtable::background_color(tab)[index_med, col] <- fhiplot::warning_color["med"]
+    huxtable::background_color(tab)[index_hig, col] <- fhiplot::warning_color["hig"]
+  }
+
+  huxtable::background_color(tab)[index_low, 7] <- fhiplot::warning_color["low"]
+  huxtable::background_color(tab)[index_med, 8] <- fhiplot::warning_color["med"]
+  huxtable::background_color(tab)[index_hig, 9] <- fhiplot::warning_color["hig"]
 
   tab <- huxtable::add_rows(tab, tab[1, ], after = 0)
 
-  tab <- huxtable::merge_cells(tab, 1, 2:4)
-  tab[1, 2] <- "Overd\u00F8dlighet rekkevidder"
+  tab[1, 1] <- " "
 
-  tab <- huxtable::merge_cells(tab, 1, 5:7)
-  tab[1, 5] <- "D\u00F8dsfall"
+  tab <- huxtable::merge_cells(tab, 1, 2:6)
+  tab[1, 2] <- "Antall d\u00F8dsfall"
 
-  tab[1, c(1, 8)] <- " "
+  tab <- huxtable::merge_cells(tab, 1, 7:9)
+  tab[1, 7] <- "D\u00F8delighetsniv\u00E5"
+
+  nr0 <- nrow(tab)+1
+
+  huxtable::width(tab) <- 0.8
+
+  tab <- huxtable::add_footnote(tab, glue::glue(
+    "\\textsuperscript{1}Antall registrerte d{fhi::nb$oe}dsfall\\\\*",
+    "\\textsuperscript{2}Antall registrerte d{fhi::nb$oe}dsfall korrigert for registreringsforsinkelse\\\\*",
+    "\\textsuperscript{3}Antall forventede d{fhi::nb$oe}dsfall basert p{fhi::nb$aa} historiske data\\\\*",
+    "\\textsuperscript{4}Differansen mellom antall forventede og antall korrigerte d{fhi::nb$oe}dsfall\\\\*",
+    "\\textsuperscript{5}Standardavvik (n{fhi::nb$aa}r z-score $\\ge$ 2,0 regnes overd{fhi::nb$oe}deligheten som signifikant)"
+    ), border = 0)
+
+
+  nr1 <- nrow(tab)
+
+  huxtable::escape_contents(tab)[nr0:nr1, ] <- F
+  huxtable::escape_contents(tab)[2, 2:6] <- F
+
+  huxtable::left_border_style(tab)[2:(nr0-1),2] <- "double"
+  huxtable::left_border_style(tab)[2:(nr0),7] <- "double"
+
+#tab
 
   tab1_name <- "table1.png"
   tab1 <- fs::path(fhi::temp_dir(), tab1_name)
@@ -143,26 +172,36 @@ normomo_email_internal <- function() {
     package = "normomo"
   )
 
+  img3_name <- glue::glue("Status_tiles_age-{normomo_yrwk()}.png")
+  img3 <- fd::path(
+    "results",
+    normomo_yrwk(),
+    "graphs_status",
+    img3_name,
+    package = "normomo"
+  )
+
   html <- glue::glue(
     "<html>",
-    "Nye NorMOMO resultater er klare. ",
-    "R{fhi::nb$aa}datene kommer fra D{fhi::nb$oe}ds{fhi::nb$aa}rsaksregisteret og vi analyserer det ved bruk av <a hrc='http://github.com/euromomonetwork/momo'>MOMO</a>. ",
-    "Under kan du finne overd{fhi::nb$oe}delighet sammendraget til forrige uka.<br><br><br>",
-    "<b>Tabell 1.</b> Z-score (antall standardavvik) og antall registrerte d{fhi::nb$oe}dsfall de 10 siste ukene.<br><br>",
+    "Resultater fra overv{fhi::nb$aa}kingssystemet for d{fhi::nb$oe}delighet (NorMOMO)<br><br>",
+    "Her er nye resultater fra overv{fhi::nb$aa}kingssystemet for generell d{fhi::nb$oe}delighet i Norge (NorMOMO).<br><br>",
+    "NorMOMO er basert p{fhi::nb$aa} ukentlig oppdaterte anonyme data fra Folkeregisteret og analyseres ved bruk av EuroMOMO-modellen.<br><br>",
+    "Under f{fhi::nb$oe}lger en oppsummering av forrige ukes resultater. Resultatene m{fhi::nb$aa} tolkes med varsomhet og kan justeres noe grunnet forsinkelse i rapporteringen av d{fhi::nb$oe}dsfall.<br><br><br>",
+    "<b>Tabell 1.</b> Antall registrerte d{fhi::nb$oe}dsfall de 10 siste ukene og niv{fhi::nb$aa} av d{fhi::nb$oe}delighet.<br><br>",
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "<b>Figur 1.</b> Totalt antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret ({fhi::nb$oe}verst) og de siste 5 {fhi::nb$aa}rene (nederst), alle aldersgrupper.<br><br>",
     "<img src='cid:{img1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
-    "<b>Figur 2.</b> Totalt antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} fylke.<br><br>",
+    "<b>Figur 2.</b> Antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} fylke og aldersgruppe.<br><br>",
     "<img src='cid:{img2_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "</html>"
   )
 
   fd::mailgun(
-    subject = glue::glue("NorMOMO: Uke {normomo_yrwk()} d{fhi::nb$oe}dlighet"),
+    subject = glue::glue("Resultater fra NorMOMO {normomo_yrwk()}"),
     html = html,
     to = "dashboardsfhi@gmail.com",
     bcc = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
-    inlines = c(tab1, img1, img2),
+    inlines = c(tab1, img1, img2, img3),
     is_final = actions[["normomo_email"]]$is_final()
   )
 }
@@ -178,7 +217,7 @@ normomo_graphs <- function() {
 
   pb <- fhi::txt_progress_bar(min = 0, max = length(locs))
   for (i in seq_along(locs)) {
-    setTxtProgressBar(pb, i)
+    utils::setTxtProgressBar(pb, i)
     loc_code <- locs[i]
 
     data <- fd::tbl("normomo_standard_results") %>%
@@ -193,7 +232,8 @@ normomo_graphs <- function() {
     )
   }
 
-  normomo_tiles_fylker(folder)
+  normomo_tiles(folder)
+  #normomo_tiles_age(folder)
 }
 
 normomo_graphs_deaths <- function(
@@ -260,14 +300,80 @@ normomo_graphs_deaths <- function(
 }
 
 
-normomo_tiles_fylker <- function(folder) {
+normomo_tiles <- function(folder) {
   allResults <- fd::tbl("normomo_standard_results") %>%
-    dplyr::filter(age == "Total") %>%
+    dplyr::filter(age == "Total" | location_code == "norge") %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
   x_yrwk <- rev(sort(as.character(unique(allResults$yrwk))))[1:52]
-  plotData <- allResults[yrwk %in% x_yrwk & age == "Total"]
+  plotData <- allResults[yrwk %in% x_yrwk]
+  plotData[, status := "1veryhigh"]
+  plotData[nbc < UPIb4, status := "2high"]
+  plotData[nbc < UPIb2, status := "3expected"]
+
+  plotData[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
+  plotData <- plotData[!is.na(location_name)]
+  unique(plotData$location_code)
+  unique(plotData$location_name)
+
+  plotData[, age := factor(
+    age,
+    levels=c("0to4","5to14","15to64","65P","Total"),
+    labels=c("0-4","5-14","15-64","65+","Totalt")
+  )]
+  plotData[, location_name := factor(location_name, levels = fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name)]
+
+  pretty_labs <- unique(plotData[,c("location_name","age")])
+  setorder(pretty_labs,-location_name,age)
+  pretty_labs[,pretty_cat:=glue::glue(
+    "{location_name} ({age})",
+    location_name=location_name,
+    age=age
+    )]
+  pretty_labs[,pretty_cat:=factor(pretty_cat,levels=pretty_cat)]
+
+  plotData[pretty_labs,on=c("location_name","age"),pretty_cat:=pretty_cat]
+
+  plotColours <- plotData[1:4]
+  # plotColours[1,status:="4lower"]
+  plotColours[2, status := "3expected"]
+  plotColours[3, status := "2high"]
+  plotColours[4, status := "1veryhigh"]
+
+  q <- ggplot(plotData, aes(x = yrwk, y = pretty_cat, fill = status))
+  q <- q + geom_tile(colour = "black")
+  q <- q + geom_tile(data = plotColours, alpha = 0)
+  q <- q + scale_fill_manual("",
+                             values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
+                             labels = c(
+                               "Betydelig forh\u00F8yet",
+                               "Forh\u00F8yet",
+                               "Normalt"
+                             )
+  )
+  q <- q + labs(title = "Antall d\u00F8de per uke siste \u00E5r")
+  q <- q + scale_x_discrete("\u00C5r-uke", expand = c(0, 0))
+  q <- q + scale_y_discrete("", expand = c(0, 0))
+  q <- q + labs(caption = sprintf("Sist oppdatert: %s", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y")))
+  q <- q + fhiplot::theme_fhi_basic()
+  q <- q + fhiplot::set_x_axis_vertical()
+  # q
+  fhiplot::save_a4(
+    q,
+    fs::path(folder, glue::glue("Status_tiles-{normomo_yrwk()}.png")),
+    landscape = T
+  )
+}
+
+normomo_tiles_age <- function(folder) {
+  allResults <- fd::tbl("normomo_standard_results") %>%
+    dplyr::filter(location_code == "norge") %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+
+  x_yrwk <- rev(sort(as.character(unique(allResults$yrwk))))[1:52]
+  plotData <- allResults[yrwk %in% x_yrwk]
   plotData[, status := "1veryhigh"]
   plotData[nbc < UPIb4, status := "2high"]
   plotData[nbc < UPIb2, status := "3expected"]
@@ -279,6 +385,11 @@ normomo_tiles_fylker <- function(folder) {
 
 
   plotData[, location_name := factor(location_name, levels = rev(fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name))]
+  plotData[, age := factor(
+    age,
+    levels=c("0to4","5to14","15to64","65P","Total"),
+    labels=c("0 - 4","5 - 14","15 - 64","65+","Totalt")
+    )]
 
   plotColours <- plotData[1:4]
   # plotColours[1,status:="4lower"]
@@ -286,18 +397,18 @@ normomo_tiles_fylker <- function(folder) {
   plotColours[3, status := "2high"]
   plotColours[4, status := "1veryhigh"]
 
-  q <- ggplot(plotData, aes(x = yrwk, y = location_name, fill = status))
+  q <- ggplot(plotData, aes(x = yrwk, y = age, fill = status))
   q <- q + geom_tile(colour = "black")
   q <- q + geom_tile(data = plotColours, alpha = 0)
   q <- q + scale_fill_manual("",
-    values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
-    labels = c(
-      "Betydelig h\u00F8yere enn forventet",
-      "H\u00F8yere enn forventet",
-      "Forventet/lavere enn forventet"
-    )
+                             values = c("1veryhigh" = fhiplot::warning_color[["hig"]], "2high" = fhiplot::warning_color[["med"]], "3expected" = fhiplot::warning_color[["low"]]),
+                             labels = c(
+                               "Betydelig forh\u00F8yet",
+                               "Forh\u00F8yet",
+                               "Normalt"
+                             )
   )
-  q <- q + labs(title = "Totalt antall d\u00F8de per uke siste \u00E5r")
+  q <- q + labs(title = glue::glue("Totalt antall d\u00F8de per uke siste \u00E5r i Norge"))
   q <- q + scale_x_discrete("\u00C5r-uke", expand = c(0, 0))
   q <- q + scale_y_discrete("", expand = c(0, 0))
   q <- q + labs(caption = sprintf("Sist oppdatert: %s", strftime(fd::get_rundate()[package == "normomo"]$date_extraction, format = "%d/%m/%Y")))
@@ -306,7 +417,7 @@ normomo_tiles_fylker <- function(folder) {
   # q
   fhiplot::save_a4(
     q,
-    fs::path(folder, glue::glue("Status_tiles-{normomo_yrwk()}.png")),
+    fs::path(folder, glue::glue("Status_tiles_age-{normomo_yrwk()}.png")),
     landscape = T
   )
 }
@@ -374,7 +485,7 @@ GraphTogether <- function(
   breaks <- rbind(breaksTop[, c("wk", "label")], breaksBottom[, c("wk", "label")])
 
   if (norwegian) {
-    filllabels1 <- c("Prediksjonsintervall", "Betydelig h\u00F8yere enn forventet", "H\u00F8yere enn forventet", "Forventet", "Lavere enn forventet")
+    filllabels1 <- c("Prediksjonsintervall", "Betydelig forh\u00F8yet", "Forh\u00F8yet", "Normalt", "")
     shapelabels <- c("Forel\u00F8pig")
     colourlabels <- c("Korrigert for forsinkelse", "Rapporterte d\u00F8dsfall")
     ylabel <- "Antall d\u00F8de per uke"
