@@ -2,10 +2,12 @@
 
 export("%>%")
 export(actions)
+export(amort)
 export(normomo)
 export(sykdomspuls_alert_pdf)
 export(sykdomspuls_mem)
 export(sykdomspuls_obs)
+export(weather_download)
 import(R6)
 import(data.table)
 import(ggplot2)
