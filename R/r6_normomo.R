@@ -172,15 +172,6 @@ normomo_email_results <- function() {
     package = "normomo"
   )
 
-  img3_name <- glue::glue("Status_tiles_age-{normomo_yrwk()}.png")
-  img3 <- fd::path(
-    "results",
-    normomo_yrwk(),
-    "graphs_status",
-    img3_name,
-    package = "normomo"
-  )
-
   html <- glue::glue(
     "<html>",
     "Resultater fra overv{fhi::nb$aa}kingssystemet for d{fhi::nb$oe}delighet (NorMOMO)<br><br>",
@@ -201,7 +192,7 @@ normomo_email_results <- function() {
     html = html,
     to = "dashboardsfhi@gmail.com",
     bcc = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
-    inlines = c(tab1, img1, img2, img3),
+    inlines = c(tab1, img1, img2),
     is_final = actions[["normomo_email"]]$is_final()
   )
 }
