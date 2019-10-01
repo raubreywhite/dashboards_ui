@@ -190,8 +190,7 @@ normomo_email_results <- function() {
   fd::mailgun(
     subject = glue::glue("Resultater fra NorMOMO {normomo_yrwk()}"),
     html = html,
-    to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
+    to = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
     inlines = c(tab1, img1, img2),
     is_final = actions[["normomo_email"]]$is_final()
   )
