@@ -82,19 +82,19 @@ create_mem_output <- function(conf, date) {
   sheet_rate <- xlsx::createSheet(wb, sheetName = "Andel ILI")
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  rate_df <- overview %>% dplyr::select("\u00C5r-Uke","Uke", dplyr::ends_with("% ILI"))
-  consult_df <- overview %>% dplyr::select("\u00C5r-Uke","Uke", dplyr::ends_with("konsultasjoner"))
+  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"))
+  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"))
 
   xlsx::addDataFrame(rate_df,
     sheet_rate,
     row.names = FALSE
   )
-  #xlsx::autoSizeColumn(sheet_rate, colIndex = 1:ncol(rate_df))
+  # xlsx::autoSizeColumn(sheet_rate, colIndex = 1:ncol(rate_df))
   xlsx::addDataFrame(consult_df,
     sheet_consult,
     row.names = FALSE
   )
-  #xlsx::autoSizeColumn(sheet_consult, colIndex = 1:ncol(consult_df))
+  # xlsx::autoSizeColumn(sheet_consult, colIndex = 1:ncol(consult_df))
   info <- data.frame(
     Syndrom = conf$tag,
     ICPC2 = paste(conf$icpc2, sep = ","),
@@ -105,7 +105,7 @@ create_mem_output <- function(conf, date) {
     sheet_info,
     row.names = FALSE
   )
-  #xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
+  # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/fylke.xlsx"))
 
   for (loc in unique(data[, location_code])) {
@@ -132,12 +132,13 @@ create_mem_output <- function(conf, date) {
   data[is.na(status) & rate <= high, status := "Middels"]
   data[is.na(status) & rate <= very_high, status := "H\u00F8yt"]
   data[is.na(status) & rate > very_high, status := "Sv\u00E6rt h\u00F8yt"]
-  data[, status:=factor(status, levels=c("Sv\u00E6rt lavt",
-                                         "Lavt",
-                                         "Middels",
-                                         "H\u00F8yt",
-                                         "Sv\u00E6rt h\u00F8yt"
-                                         ))]
+  data[, status := factor(status, levels = c(
+    "Sv\u00E6rt lavt",
+    "Lavt",
+    "Middels",
+    "H\u00F8yt",
+    "Sv\u00E6rt h\u00F8yt"
+  ))]
   for (i in 1:nrow(weeks)) {
     counties <- fhidata::norway_map_counties
     xyrwk <- weeks$yrwk[i]
@@ -167,7 +168,7 @@ create_mem_output <- function(conf, date) {
     )
     cnames_whole_country <- plot_data[, .(rate, location_code)][label_positions, on = "location_code"]
 
-    cnames_whole_country$rate <- format(round(cnames_whole_country$rate, 1), nsmall=1)
+    cnames_whole_country$rate <- format(round(cnames_whole_country$rate, 1), nsmall = 1)
 
     cnames_country <- cnames_whole_country[ !(location_code %in% c("county02", "county03"))]
     cnames_osl_ak <- cnames_whole_country[location_code %in% c("county02", "county03")]
@@ -192,7 +193,8 @@ create_mem_output <- function(conf, date) {
           "Lavt" = "#43B3CE",
           "Middels" = "#5793A7",
           "H\u00F8yt" = "#276B81",
-          "Sv\u00E6rt h\u00F8yt" = "#00586E"),
+          "Sv\u00E6rt h\u00F8yt" = "#00586E"
+        ),
         drop = FALSE
       ) +
       geom_text(data = cnames_country, aes(long, lat, label = rate), size = 2.3) +
@@ -226,7 +228,7 @@ create_mem_output <- function(conf, date) {
         "Middels" = "#5793A7",
         "H\u00F8yt" = "#276B81",
         "Sv\u00E6rt h\u00F8yt" = "#00586E"
-      ),drop = FALSE) +
+      ), drop = FALSE) +
       geom_text(data = cnames_osl_ak, aes(long, lat, label = rate), size = 2.3) +
       theme(legend.position = "none") +
       ggtitle("Oslo og Akershus") +
