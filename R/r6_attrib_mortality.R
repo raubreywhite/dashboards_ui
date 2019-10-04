@@ -59,7 +59,7 @@ amort <- R6::R6Class(
 )
 
 amort_folder <- function() {
-  fd::results_folder("amort", fd::get_rundate()[package == "brain_normomo"]$date_extraction)
+  fd::results_folder("amort", fd::get_rundate()[package == "brain_amort"]$date_extraction)
 }
 
 amort_table_1 <- function() {
