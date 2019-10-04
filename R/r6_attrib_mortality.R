@@ -24,6 +24,9 @@ amort <- R6::R6Class(
         return()
       }
 
+      fd::msg("This is the amort_folder")
+      fd::msg(amort_folder())
+
       fs::dir_create(amort_folder())
       amort_table_1()
       amort_rr_graphs()
@@ -145,6 +148,7 @@ amort_table_1 <- function() {
   # tab
   tab1_name <- "table1.png"
   tab1 <- fs::path(amort_folder(), tab1_name)
+  print(tab1)
   # tab1 <- fs::path("/git", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
 }
