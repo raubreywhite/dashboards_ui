@@ -88,10 +88,9 @@ normomo_email_results <- function() {
     "\u00C5r-uke" = d$yrwk,
     "Registrert\\textsuperscript{1}" = d$nb,
     "Korrigert\\textsuperscript{2}" = round(d$nbc),
-    "Forventet\\textsuperscript{3}" = round(d$Pnb),
+    "Z-score\\textsuperscript{3}" = fhiplot::format_nor(d$zscore, 2),
     "Overd\u00F8dlighet\\textsuperscript{4}" = round(d$excessp),
-    "Z-score\\textsuperscript{5}" = fhiplot::format_nor(d$zscore, 2),
-    "Normalt" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
+    "Normalt\\textsuperscript{5}" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
     "Forh\u00F8yet" = glue::glue("{round(d$thresholdp_1)} - {round(d$thresholdp_2)}"),
     "Betydelig forh\u00F8yet" = glue::glue(">{round(d$thresholdp_2)}")
   ) %>%
@@ -107,51 +106,52 @@ normomo_email_results <- function() {
   index_med <- which(d$status == "medium") + 1
   index_hig <- which(d$status == "high") + 1
 
-  for (col in 1:6) {
+  for (col in 1:5) {
     huxtable::background_color(tab)[-1, col] <- fhiplot::warning_color["low"]
     huxtable::background_color(tab)[index_med, col] <- fhiplot::warning_color["med"]
     huxtable::background_color(tab)[index_hig, col] <- fhiplot::warning_color["hig"]
   }
 
-  huxtable::background_color(tab)[index_low, 7] <- fhiplot::warning_color["low"]
-  huxtable::background_color(tab)[index_med, 8] <- fhiplot::warning_color["med"]
-  huxtable::background_color(tab)[index_hig, 9] <- fhiplot::warning_color["hig"]
+  huxtable::background_color(tab)[index_low, 6] <- fhiplot::warning_color["low"]
+  huxtable::background_color(tab)[index_med, 7] <- fhiplot::warning_color["med"]
+  huxtable::background_color(tab)[index_hig, 8] <- fhiplot::warning_color["hig"]
 
   tab <- huxtable::add_rows(tab, tab[1, ], after = 0)
 
   tab[1, 1] <- " "
+  tab[1, 5] <- " "
 
-  tab <- huxtable::merge_cells(tab, 1, 2:6)
+  tab <- huxtable::merge_cells(tab, 1, 2:4)
   tab[1, 2] <- "Antall d\u00F8dsfall"
 
-  tab <- huxtable::merge_cells(tab, 1, 7:9)
-  tab[1, 7] <- "D\u00F8delighetsniv\u00E5"
+  tab <- huxtable::merge_cells(tab, 1, 6:8)
+  tab[1, 6] <- "D\u00F8delighetsniv\u00E5"
+
+
+  huxtable::width(tab) <- 0.9
 
   nr0 <- nrow(tab) + 1
-
-  huxtable::width(tab) <- 0.8
-
   tab <- huxtable::add_footnote(tab, glue::glue(
     "\\textsuperscript{1}Antall registrerte d{fhi::nb$oe}dsfall\\\\*",
     "\\textsuperscript{2}Antall registrerte d{fhi::nb$oe}dsfall korrigert for registreringsforsinkelse\\\\*",
-    "\\textsuperscript{3}Antall forventede d{fhi::nb$oe}dsfall basert p{fhi::nb$aa} historiske data\\\\*",
-    "\\textsuperscript{4}Differansen mellom antall forventede og antall korrigerte d{fhi::nb$oe}dsfall\\\\*",
-    "\\textsuperscript{5}Standardavvik (n{fhi::nb$aa}r z-score $\\ge$ 2,0 regnes overd{fhi::nb$oe}deligheten som signifikant)"
+    "\\textsuperscript{3}Standardavvik (n{fhi::nb$aa}r z-score $\\ge$ 2,0 regnes at det er h{fhi::nb$oe}yere d{fhi::nb$oe}dsfall enn vanlig)\\\\*",
+    "\\textsuperscript{4}Differansen mellom antall korrigerte dødsfall og {fhi::nb$oe}vre grense for normalt antall d{fhi::nb$oe}dsfall\\textsuperscript{5}\\\\*",
+    "\\textsuperscript{5}95\\% prediksjonsintervall"
   ), border = 0)
-
-
   nr1 <- nrow(tab)
 
   huxtable::escape_contents(tab)[nr0:nr1, ] <- F
-  huxtable::escape_contents(tab)[2, 2:6] <- F
+  huxtable::escape_contents(tab)[1:2, ] <- F
 
-  huxtable::left_border_style(tab)[2:(nr0 - 1), 2] <- "double"
-  huxtable::left_border_style(tab)[2:(nr0), 7] <- "double"
+  huxtable::left_border_style(tab)[1:(nr0 - 1), 2] <- "double"
+  huxtable::left_border_style(tab)[1:(nr0), 5] <- "double"
+  huxtable::left_border_style(tab)[1:(nr0), 6] <- "double"
 
   # tab
 
   tab1_name <- "table1.png"
   tab1 <- fs::path(fhi::temp_dir(), tab1_name)
+  #tab1 <- fd::path("results", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
 
   img1_name <- glue::glue("incl_reported_norge-Total-{normomo_yrwk()}.png")
@@ -163,7 +163,7 @@ normomo_email_results <- function() {
     package = "normomo"
   )
 
-  img2_name <- glue::glue("Status_tiles-{normomo_yrwk()}.png")
+  img2_name <- glue::glue("Status_tiles_geo-{normomo_yrwk()}.png")
   img2 <- fd::path(
     "results",
     normomo_yrwk(),
@@ -172,11 +172,20 @@ normomo_email_results <- function() {
     package = "normomo"
   )
 
+  img3_name <- glue::glue("Status_tiles_age-{normomo_yrwk()}.png")
+  img3 <- fd::path(
+    "results",
+    normomo_yrwk(),
+    "graphs_status",
+    img3_name,
+    package = "normomo"
+  )
+
   html <- glue::glue(
     "<html>",
     "Resultater fra overv{fhi::nb$aa}kingssystemet for d{fhi::nb$oe}delighet (NorMOMO)<br><br>",
-    "Her er nye resultater fra overv{fhi::nb$aa}kingssystemet for generell d{fhi::nb$oe}delighet i Norge (NorMOMO).<br><br>",
-    "NorMOMO er basert p{fhi::nb$aa} ukentlig oppdaterte anonyme data fra Folkeregisteret og analyseres ved bruk av EuroMOMO-modellen.<br><br>",
+    "Her er nye resultater fra overv{fhi::nb$aa}kingssystemet for generell d{fhi::nb$oe}delighet i Norge (<a href='https://www.fhi.no/sv/influensa/influensaovervaking/overvakingssystem-for-dodelighet-eu/'>NorMOMO</a>).<br><br>",
+    "NorMOMO er basert p{fhi::nb$aa} ukentlig oppdaterte anonyme data fra Folkeregisteret og analyseres ved bruk av <a href='http://www.euromomo.eu/methods/methods.html'>EuroMOMO-modellen</a>.<br><br>",
     "Under f{fhi::nb$oe}lger en oppsummering av forrige ukes resultater. Resultatene m{fhi::nb$aa} tolkes med varsomhet og kan justeres noe grunnet forsinkelse i rapporteringen av d{fhi::nb$oe}dsfall.<br><br><br>",
     "<b>Tabell 1.</b> Antall registrerte d{fhi::nb$oe}dsfall de 10 siste ukene og niv{fhi::nb$aa} av d{fhi::nb$oe}delighet.<br><br>",
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
@@ -184,6 +193,8 @@ normomo_email_results <- function() {
     "<img src='cid:{img1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "<b>Figur 2.</b> Antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} fylke.<br><br>",
     "<img src='cid:{img2_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
+    "<b>Figur 3.</b> Antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret fordelt p{fhi::nb$aa} aldersgruppe.<br><br>",
+    "<img src='cid:{img3_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "</html>"
   )
 
@@ -191,7 +202,7 @@ normomo_email_results <- function() {
     subject = glue::glue("Resultater fra NorMOMO {normomo_yrwk()}"),
     html = html,
     to = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
-    inlines = c(tab1, img1, img2),
+    inlines = c(tab1, img1, img2, img3),
     is_final = actions[["normomo_email"]]$is_final()
   )
 }
@@ -222,8 +233,8 @@ normomo_graphs <- function() {
     )
   }
 
-  normomo_tiles(folder)
-  # normomo_tiles_age(folder)
+  normomo_tiles_geo(folder)
+  normomo_tiles_age(folder)
 }
 
 normomo_graphs_deaths <- function(
@@ -290,7 +301,7 @@ normomo_graphs_deaths <- function(
 }
 
 
-normomo_tiles <- function(folder) {
+normomo_tiles_geo <- function(folder) {
   allResults <- fd::tbl("normomo_standard_results") %>%
     dplyr::filter(age == "Total") %>%
     dplyr::collect() %>%
@@ -350,7 +361,7 @@ normomo_tiles <- function(folder) {
   # q
   fhiplot::save_a4(
     q,
-    fs::path(folder, glue::glue("Status_tiles-{normomo_yrwk()}.png")),
+    fs::path(folder, glue::glue("Status_tiles_geo-{normomo_yrwk()}.png")),
     landscape = T
   )
 }

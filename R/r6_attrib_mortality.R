@@ -24,11 +24,21 @@ amort <- R6::R6Class(
         actions[["amort"]]$action_performed()
       }
 
+      date_extraction <- max(
+        rundate[package == "normomo"]$date_extraction,
+        rundate[package == "sykdomspuls"]$date_extraction
+      )
+
+      date_results <- max(
+        rundate[package == "normomo"]$date_results,
+        rundate[package == "sykdomspuls"]$date_results
+      )
+
       # update rundate
       fd::update_rundate(
         package = "ui_amort",
-        date_extraction = rundate[package == "normomo"]$date_extraction,
-        date_results = rundate[package == "normomo"]$date_results,
+        date_extraction = date_extraction,
+        date_results = date_results,
         date_run = lubridate::today()
       )
     }
