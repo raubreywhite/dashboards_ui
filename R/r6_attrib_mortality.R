@@ -8,34 +8,56 @@ amort <- R6::R6Class(
   list(
     run_all = function() {
       # check to see if it can run
+      if(!fd::exists_rundate("brain_amort")) return()
       rundate <- fd::get_rundate()
+
       run <- TRUE
-      if ("ui_amort" %in% rundate$package) {
-        if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "normomo"]$date_extraction) run <- FALSE
-        if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "sykdomspuls"]$date_extraction) run <- FALSE
+      if(fd::exists_rundate("brain_amort")){
+        if(rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_amort"]$date_extraction){
+          run <- FALSE
+        }
       }
+
       if (!run & fd::config$is_production) {
         return()
       }
 
+      fs::dir_create(amort_folder())
+      amort_table_1()
+      amort_rr_graphs()
+
       # send email
-      if (actions[["amort"]]$can_perform_action()) {
+      if (actions[["ui_amort_email"]]$can_perform_action()) {
         amort_email_results()
-        actions[["amort"]]$action_performed()
+        actions[["ui_amort_email"]]$action_performed()
       }
+
+      date_extraction <- max(
+        rundate[package == "normomo"]$date_extraction,
+        rundate[package == "sykdomspuls"]$date_extraction
+      )
+
+      date_results <- max(
+        rundate[package == "normomo"]$date_results,
+        rundate[package == "sykdomspuls"]$date_results
+      )
 
       # update rundate
       fd::update_rundate(
         package = "ui_amort",
-        date_extraction = rundate[package == "normomo"]$date_extraction,
-        date_results = rundate[package == "normomo"]$date_results,
+        date_extraction = date_extraction,
+        date_results = date_results,
         date_run = lubridate::today()
       )
     }
   )
 )
 
-amort_email_results <- function() {
+amort_folder <- function(){
+  fd::results_folder("amort",fd::get_rundate()[package=="brain_normomo"]$date_extraction)
+}
+
+amort_table_1 <- function(){
   weather <- fd::get_weather()
   weather <- weather[, .(
     tx_mean = mean(tx),
@@ -120,15 +142,70 @@ amort_email_results <- function() {
 
   # tab
   tab1_name <- "table1.png"
-  tab1 <- fs::path(fhi::temp_dir(), tab1_name)
+  tab1 <- fs::path(amort_folder(), tab1_name)
   # tab1 <- fs::path("/git", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
+}
+
+amort_rr_graphs <- function(){
+  x_yr <- fhi::isoyear_n(fd::get_rundate()[package=="brain_normomo"]$date_results)
+  rrs <- fd::tbl("brain_amort_rr") %>%
+    dplyr::filter(year_train_max == !!x_yr) %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+
+  rrs[fhidata::norway_locations_long_current, on="location_code", location_name:=location_name]
+
+  lvls <- c("Norge",unique(fhidata::norway_locations_current$county_name))
+  rrs[,location_name:=factor(location_name, levels=lvls)]
+
+  q <- ggplot(rrs[exposure=="tx"], aes(x=exposure_value, y=rr_est, ymin=rr_l95, ymax=rr_u95))
+  q <- q + geom_ribbon(alpha=0.5)
+  q <- q + geom_line()
+  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol=4, scales="fixed")
+  q <- q + fhiplot::theme_fhi_lines()
+  q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
+  q <- q + fhiplot::scale_fill_fhi("", palette = "contrast", direction = 1)
+  q <- q + scale_y_continuous("Risk ratio", expand=expand_scale(mult=c(0,0.05)))
+  q <- q + scale_x_continuous("Degrees celcius")
+  q <- q + labs(title = "Attributable risk of death due to max daily temperature")
+  fhiplot::save_a4(q, fs::path(amort_folder(), "fig1.png"), landscape = F)
+
+  q <- ggplot(rrs[exposure=="ilsper1000"], aes(x=exposure_value, y=rr_est, ymin=rr_l95, ymax=rr_u95))
+  q <- q + geom_ribbon(alpha=0.5)
+  q <- q + geom_line()
+  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol=4, scales="fixed")
+  q <- q + fhiplot::theme_fhi_lines()
+  q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
+  q <- q + fhiplot::scale_fill_fhi("", palette = "contrast", direction = 1)
+  q <- q + scale_y_continuous("Risk ratio", expand=expand_scale(mult=c(0,0.05)))
+  q <- q + scale_x_continuous("Number of consultations per 1000 that are ILS")
+  q <- q + labs(title = "Attributable risk of death due to number of consultations per 1000 that are ILS")
+  fhiplot::save_a4(q, fs::path(amort_folder(), "fig2.png"), landscape = F)
+
+
+}
+
+amort_email_results <- function() {
+
+  tab1_name <- "table1.png"
+  tab1 <- fs::path(amort_folder(), tab1_name)
+
+  fig1_name <- "fig1.png"
+  fig1 <- fs::path(amort_folder(), fig1_name)
+
+  fig2_name <- "fig2.png"
+  fig2 <- fs::path(amort_folder(), fig2_name)
 
   html <- glue::glue(
     "<html>",
     "<h2>Dette er en TEST av data sammensl{fhi::nb$aa}ing. Ikke ta resultatene for seri{fhi::nb$oe}s</h2>",
-    "<b>Tabell 1.</b> .<br><br>",
+    "<b>Tabell 1.</b> XXXXXXX.<br><br>",
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
+    "<b>Figur 1.</b> XXXXXXX.<br><br>",
+    "<img src='cid:{fig1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
+    "<b>Figur 2.</b> XXXXXXX.<br><br>",
+    "<img src='cid:{fig2_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "</html>"
   )
 
@@ -137,7 +214,7 @@ amort_email_results <- function() {
     html = html,
     to = "dashboardsfhi@gmail.com",
     bcc = fd::e_emails("normomo_results", is_final = actions[["amort"]]$is_final()),
-    inlines = c(tab1),
+    inlines = c(tab1, fig1, fig2),
     is_final = actions[["amort"]]$is_final()
   )
 }
