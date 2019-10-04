@@ -151,7 +151,7 @@ normomo_email_results <- function() {
 
   tab1_name <- "table1.png"
   tab1 <- fs::path(fhi::temp_dir(), tab1_name)
-  #tab1 <- fd::path("results", tab1_name)
+  # tab1 <- fd::path("results", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
 
   img1_name <- glue::glue("incl_reported_norge-Total-{normomo_yrwk()}.png")

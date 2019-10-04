@@ -8,12 +8,14 @@ amort <- R6::R6Class(
   list(
     run_all = function() {
       # check to see if it can run
-      if(!fd::exists_rundate("brain_amort")) return()
+      if (!fd::exists_rundate("brain_amort")) {
+        return()
+      }
       rundate <- fd::get_rundate()
 
       run <- TRUE
-      if(fd::exists_rundate("brain_amort")){
-        if(rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_amort"]$date_extraction){
+      if (fd::exists_rundate("brain_amort")) {
+        if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_amort"]$date_extraction) {
           run <- FALSE
         }
       }
@@ -53,11 +55,11 @@ amort <- R6::R6Class(
   )
 )
 
-amort_folder <- function(){
-  fd::results_folder("amort",fd::get_rundate()[package=="brain_normomo"]$date_extraction)
+amort_folder <- function() {
+  fd::results_folder("amort", fd::get_rundate()[package == "brain_normomo"]$date_extraction)
 }
 
-amort_table_1 <- function(){
+amort_table_1 <- function() {
   weather <- fd::get_weather()
   weather <- weather[, .(
     tx_mean = mean(tx),
@@ -147,47 +149,44 @@ amort_table_1 <- function(){
   fd::huxtable_to_png(tab, file = tab1)
 }
 
-amort_rr_graphs <- function(){
-  x_yr <- fhi::isoyear_n(fd::get_rundate()[package=="brain_normomo"]$date_results)
+amort_rr_graphs <- function() {
+  x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_normomo"]$date_results)
   rrs <- fd::tbl("brain_amort_rr") %>%
     dplyr::filter(year_train_max == !!x_yr) %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
-  rrs[fhidata::norway_locations_long_current, on="location_code", location_name:=location_name]
+  rrs[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
 
-  lvls <- c("Norge",unique(fhidata::norway_locations_current$county_name))
-  rrs[,location_name:=factor(location_name, levels=lvls)]
+  lvls <- c("Norge", unique(fhidata::norway_locations_current$county_name))
+  rrs[, location_name := factor(location_name, levels = lvls)]
 
-  q <- ggplot(rrs[exposure=="tx"], aes(x=exposure_value, y=rr_est, ymin=rr_l95, ymax=rr_u95))
-  q <- q + geom_ribbon(alpha=0.5)
+  q <- ggplot(rrs[exposure == "tx"], aes(x = exposure_value, y = rr_est, ymin = rr_l95, ymax = rr_u95))
+  q <- q + geom_ribbon(alpha = 0.5)
   q <- q + geom_line()
-  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol=4, scales="fixed")
+  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol = 4, scales = "fixed")
   q <- q + fhiplot::theme_fhi_lines()
   q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
   q <- q + fhiplot::scale_fill_fhi("", palette = "contrast", direction = 1)
-  q <- q + scale_y_continuous("Risk ratio", expand=expand_scale(mult=c(0,0.05)))
+  q <- q + scale_y_continuous("Risk ratio", expand = expand_scale(mult = c(0, 0.05)))
   q <- q + scale_x_continuous("Degrees celcius")
   q <- q + labs(title = "Attributable risk of death due to max daily temperature")
   fhiplot::save_a4(q, fs::path(amort_folder(), "fig1.png"), landscape = F)
 
-  q <- ggplot(rrs[exposure=="ilsper1000"], aes(x=exposure_value, y=rr_est, ymin=rr_l95, ymax=rr_u95))
-  q <- q + geom_ribbon(alpha=0.5)
+  q <- ggplot(rrs[exposure == "ilsper1000"], aes(x = exposure_value, y = rr_est, ymin = rr_l95, ymax = rr_u95))
+  q <- q + geom_ribbon(alpha = 0.5)
   q <- q + geom_line()
-  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol=4, scales="fixed")
+  q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol = 4, scales = "fixed")
   q <- q + fhiplot::theme_fhi_lines()
   q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
   q <- q + fhiplot::scale_fill_fhi("", palette = "contrast", direction = 1)
-  q <- q + scale_y_continuous("Risk ratio", expand=expand_scale(mult=c(0,0.05)))
+  q <- q + scale_y_continuous("Risk ratio", expand = expand_scale(mult = c(0, 0.05)))
   q <- q + scale_x_continuous("Number of consultations per 1000 that are ILS")
   q <- q + labs(title = "Attributable risk of death due to number of consultations per 1000 that are ILS")
   fhiplot::save_a4(q, fs::path(amort_folder(), "fig2.png"), landscape = F)
-
-
 }
 
 amort_email_results <- function() {
-
   tab1_name <- "table1.png"
   tab1 <- fs::path(amort_folder(), tab1_name)
 
