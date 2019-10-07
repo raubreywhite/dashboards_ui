@@ -89,7 +89,7 @@ normomo_email_results <- function() {
     "Registrert\\textsuperscript{1}" = d$nb,
     "Korrigert\\textsuperscript{2}" = round(d$nbc),
     "Z-score\\textsuperscript{3}" = fhiplot::format_nor(d$zscore, 2),
-    "Overd\u00F8dlighet\\textsuperscript{4}" = round(d$excessp),
+    "Overd\u00F8delighet\\textsuperscript{4}" = round(d$excessp),
     "Normalt\\textsuperscript{5}" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
     "Forh\u00F8yet" = glue::glue("{round(d$thresholdp_1)} - {round(d$thresholdp_2)}"),
     "Betydelig forh\u00F8yet" = glue::glue(">{round(d$thresholdp_2)}")
@@ -134,7 +134,7 @@ normomo_email_results <- function() {
   tab <- huxtable::add_footnote(tab, glue::glue(
     "\\textsuperscript{1}Antall registrerte d{fhi::nb$oe}dsfall\\\\*",
     "\\textsuperscript{2}Antall registrerte d{fhi::nb$oe}dsfall korrigert for registreringsforsinkelse\\\\*",
-    "\\textsuperscript{3}Standardavvik (n{fhi::nb$aa}r z-score $\\ge$ 2,0 regnes at det er h{fhi::nb$oe}yere d{fhi::nb$oe}dsfall enn vanlig)\\\\*",
+    "\\textsuperscript{3}Standardavvik (z-score $\\ge$ 2,0 indikerer at det er et h{fhi::nb$oe}yere antall d{fhi::nb$oe}dsfall enn normalt)\\\\*",
     "\\textsuperscript{4}Differansen mellom antall korrigerte dødsfall og {fhi::nb$oe}vre grense for normalt antall d{fhi::nb$oe}dsfall\\textsuperscript{5}\\\\*",
     "\\textsuperscript{5}95\\% prediksjonsintervall"
   ), border = 0)

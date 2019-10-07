@@ -161,6 +161,7 @@ amort_rr_graphs <- function() {
     fd::latin1_to_utf8()
 
   rrs[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
+  min_vals <- rrs[rr_est==1]
 
   lvls <- c("Norge", unique(fhidata::norway_locations_current$county_name))
   rrs[, location_name := factor(location_name, levels = lvls)]
@@ -168,6 +169,8 @@ amort_rr_graphs <- function() {
   q <- ggplot(rrs[exposure == "tx"], aes(x = exposure_value, y = rr_est, ymin = rr_l95, ymax = rr_u95))
   q <- q + geom_ribbon(alpha = 0.5)
   q <- q + geom_line()
+  q <- q + geom_hline(yintercept=1, color="red")
+  q <- q + geom_vline(data=min_vals[exposure == "tx"], mapping=aes(xintercept=exposure_value), color="red")
   q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol = 4, scales = "fixed")
   q <- q + fhiplot::theme_fhi_lines()
   q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
@@ -180,6 +183,7 @@ amort_rr_graphs <- function() {
   q <- ggplot(rrs[exposure == "ilsper1000"], aes(x = exposure_value, y = rr_est, ymin = rr_l95, ymax = rr_u95))
   q <- q + geom_ribbon(alpha = 0.5)
   q <- q + geom_line()
+  q <- q + geom_hline(yintercept=1, color="red")
   q <- q + lemon::facet_rep_wrap(~location_name, repeat.tick.labels = "all", ncol = 4, scales = "fixed")
   q <- q + fhiplot::theme_fhi_lines()
   q <- q + fhiplot::scale_color_fhi("", palette = "contrast", direction = 1)
@@ -216,8 +220,8 @@ amort_email_results <- function() {
     subject = glue::glue("Tilskrivbar d{fhi::nb$oe}delighet {normomo_yrwk()}"),
     html = html,
     to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("normomo_results", is_final = actions[["amort"]]$is_final()),
+    bcc = fd::e_emails("normomo_results", is_final = actions[["ui_amort"]]$is_final()),
     inlines = c(tab1, fig1, fig2),
-    is_final = actions[["amort"]]$is_final()
+    is_final = actions[["ui_amort"]]$is_final()
   )
 }
