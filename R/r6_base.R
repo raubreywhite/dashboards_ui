@@ -1,6 +1,6 @@
 #' Mem -outputs
 #' @import R6
-#' @export sykdomspuls_mem
+#' @export 
 UIBase<- R6::R6Class(
   "UIBase",
   portable = FALSE,
