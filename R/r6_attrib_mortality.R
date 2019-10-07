@@ -14,7 +14,7 @@ amort <- R6::R6Class(
       rundate <- fd::get_rundate()
 
       run <- TRUE
-      if (fd::exists_rundate("brain_amort")) {
+      if (fd::exists_rundate("brain_amort") & fd::exists_rundate("ui_amort")) {
         if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_amort"]$date_extraction) {
           run <- FALSE
         }
@@ -32,9 +32,9 @@ amort <- R6::R6Class(
       amort_rr_graphs()
 
       # send email
-      if (actions[["ui_amort_email"]]$can_perform_action()) {
+      if (actions[["ui_amort"]]$can_perform_action()) {
         amort_email_results()
-        actions[["ui_amort_email"]]$action_performed()
+        actions[["ui_amort"]]$action_performed()
       }
 
       date_extraction <- max(
@@ -154,7 +154,7 @@ amort_table_1 <- function() {
 }
 
 amort_rr_graphs <- function() {
-  x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_normomo"]$date_results)
+  x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_amort"]$date_results)
   rrs <- fd::tbl("brain_amort_rr") %>%
     dplyr::filter(year_train_max == !!x_yr) %>%
     dplyr::collect() %>%
