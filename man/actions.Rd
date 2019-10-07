@@ -4,7 +4,7 @@
 \name{actions}
 \alias{actions}
 \title{actions}
-\format{An object of class \code{environment} of length 5.}
+\format{An object of class \code{environment} of length 1.}
 \usage{
 actions
 }
