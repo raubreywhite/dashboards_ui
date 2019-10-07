@@ -92,7 +92,7 @@ amort_table_1 <- function() {
 
   tab <- huxtable::hux(
     "\u00C5r-uke" = d$yrwk,
-    "Overd\u00F8dlighet\\textsuperscript{1}" = round(d$excessp),
+    "Overd\u00F8delighet\\textsuperscript{1}" = round(d$excessp),
     "Min" = fhiplot::format_nor(d$tn_mean, 1),
     "Maks" = fhiplot::format_nor(d$tx_mean, 1),
     "\\%" = fhiplot::format_nor(d$ils_rate, 2),
