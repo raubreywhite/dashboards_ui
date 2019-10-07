@@ -5,6 +5,7 @@ amort <- R6::R6Class(
   "amort",
   portable = FALSE,
   cloneable = FALSE,
+  inherit = UIBase,
   list(
     run_all = function() {
       # check to see if it can run

@@ -3,6 +3,7 @@
 #' @export sykdomspuls_mem
 sykdomspuls_mem <- R6::R6Class(
   "sykdomspuls_mem",
+  inherit = UIBase,
   portable = FALSE,
   cloneable = FALSE,
   list(
