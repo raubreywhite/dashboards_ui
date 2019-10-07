@@ -5,6 +5,7 @@ weather_download <- R6::R6Class(
   "weather_download",
   portable = FALSE,
   cloneable = FALSE,
+  inherit = UIBase,
   list(
     run_all = function() {
       # weather_download

@@ -7,20 +7,22 @@ UIBase<- R6::R6Class(
   cloneable = TRUE,
   list(
     run_with_catch = function() {
+      print(class(self)[1])
       tryCatch({
         self$run_all()
       },
       error=function(e){
         if(fd::config$is_production){
           fd::msg("ERROR", slack=T)
+          fd::msg(e, slack=T)
         } else {
-          stop("ERROR")
+          stop(e)
         }
       }
       )
     }
    ,run_all = function(){
-      stop("run_internal must be implemented")
+      stop("run_all must be implemented")
       
     }
   )
