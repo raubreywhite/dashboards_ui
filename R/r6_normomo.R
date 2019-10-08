@@ -70,7 +70,7 @@ normomo_email_ssi <- function() {
   fd::mailgun(
     subject = glue::glue("[euromomo input] [Norway] [{stringr::str_replace(normomo_yrwk(), '-', ' ')}]"),
     html = html,
-    to = fd::e_emails("normomo_ssi", is_final = actions[["normomo_email"]]$is_final()),
+    to = fd::e_emails("ui_normomo_ssi", is_final = actions[["normomo_email"]]$is_final()),
     attachments = file,
     is_final = actions[["normomo_email"]]$is_final()
   )
@@ -187,7 +187,7 @@ normomo_email_results <- function() {
     "Resultater fra overv{fhi::nb$aa}kingssystemet for d{fhi::nb$oe}delighet (NorMOMO)<br><br>",
     "Her er nye resultater fra overv{fhi::nb$aa}kingssystemet for generell d{fhi::nb$oe}delighet i Norge (<a href='https://www.fhi.no/sv/influensa/influensaovervaking/overvakingssystem-for-dodelighet-eu/'>NorMOMO</a>).<br><br>",
     "NorMOMO er basert p{fhi::nb$aa} ukentlig oppdaterte anonyme data fra Folkeregisteret og analyseres ved bruk av <a href='http://www.euromomo.eu/methods/methods.html'>EuroMOMO-modellen</a>.<br><br>",
-    "Under f{fhi::nb$oe}lger en oppsummering av forrige ukes resultater. Resultatene m{fhi::nb$aa} tolkes med varsomhet og kan justeres noe grunnet forsinkelse i rapporteringen av d{fhi::nb$oe}dsfall.<br><br><br>",
+    "Under f{fhi::nb$oe}lger en oppsummering av forrige ukes resultater. Resultatene <span style='color:red'>er til intern bruk</span>, m{fhi::nb$aa} tolkes med varsomhet og kan justeres noe grunnet forsinkelse i rapporteringen av d{fhi::nb$oe}dsfall.<br><br><br>",
     "<b>Tabell 1.</b> Antall registrerte d{fhi::nb$oe}dsfall de 10 siste ukene og niv{fhi::nb$aa} av d{fhi::nb$oe}delighet.<br><br>",
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "<b>Figur 1.</b> Totalt antall d{fhi::nb$oe}dsfall per uke det siste {fhi::nb$aa}ret ({fhi::nb$oe}verst) og de siste 5 {fhi::nb$aa}rene (nederst), alle aldersgrupper.<br><br>",
@@ -202,7 +202,7 @@ normomo_email_results <- function() {
   fd::mailgun(
     subject = glue::glue("Resultater fra NorMOMO {normomo_yrwk()}"),
     html = html,
-    to = fd::e_emails("normomo_results", is_final = actions[["normomo_email"]]$is_final()),
+    to = fd::e_emails("ui_normomo_results", is_final = actions[["normomo_email"]]$is_final()),
     inlines = c(tab1, img1, img2, img3),
     is_final = actions[["normomo_email"]]$is_final()
   )
