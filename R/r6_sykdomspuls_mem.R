@@ -56,7 +56,6 @@ create_mem_output <- function(conf, date) {
     dplyr::filter(season == current_season & tag == x_tag) %>%
     dplyr::collect()
   setDT(data)
-  date <- "2019-10-04"
   folder <- fd::results_folder(glue::glue("mem_{x_tag}"), date)
   fs::dir_create(folder)
 
