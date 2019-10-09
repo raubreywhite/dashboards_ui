@@ -5,14 +5,6 @@
   )
 
   tryCatch({
-    actions[["weather_download"]] <- fd::action$new(
-      key = "ui_weather_download",
-      value = lubridate::today(),
-      dev_always_performs = TRUE,
-      production_days = c(1:7),
-      first_date_of_production = "2019-09-21"
-    )
-
     actions[["sykdomspuls_obs"]] <- fd::action$new(
       key = "ui_sykdomspuls_obs",
       value = fhi::isoyearweek(sykdomspuls_date()),

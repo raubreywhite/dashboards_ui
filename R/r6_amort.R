@@ -63,6 +63,12 @@ amort_folder <- function() {
   fd::results_folder("amort", fd::get_rundate()[package == "brain_amort"]$date_extraction)
 }
 
+amort_season_graphs <- function() {
+  d <- fd::tbl("brain_amort_results") %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+}
+
 amort_table_1 <- function() {
   weather <- fd::get_weather()
   weather <- weather[, .(
@@ -221,7 +227,7 @@ amort_email_results <- function() {
     subject = glue::glue("Tilskrivbar d{fhi::nb$oe}delighet {normomo_yrwk()}"),
     html = html,
     to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("normomo_results", is_final = actions[["ui_amort"]]$is_final()),
+    bcc = fd::e_emails("ui_amort", is_final = actions[["ui_amort"]]$is_final()),
     inlines = c(tab1, fig1, fig2),
     is_final = actions[["ui_amort"]]$is_final()
   )
