@@ -59,6 +59,16 @@ create_mem_output <- function(conf, date) {
   folder <- fd::results_folder(glue::glue("mem_{x_tag}"), date)
   fs::dir_create(folder)
 
+
+  #ILI for norway
+
+  ili_out <- fd::tbl("spuls_mem_results") %>%
+    dplyr::filter(location_code == "norge", tag == x_tag) %>%
+    dplyr::select(year, year_week=yrwk, week, season, percent_ili=rate,
+                  season_week=x,
+                  ili_consultations=n, total_consultations=denominator, status) %>% dplyr::collect()
+  readr::write_csv(ili_out, glue::glue("{folder}/ili_data.csv"))
+            
   out_data <- data %>%
     dplyr::mutate(
       rate = round(rate, 2),
@@ -68,6 +78,8 @@ create_mem_output <- function(conf, date) {
   setDT(out_data)
 
 
+
+  
   overview <- dcast(out_data, yrwk + week ~ loc_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
 
