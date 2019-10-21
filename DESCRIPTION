@@ -27,7 +27,8 @@ Imports:
   cowplot,
   ggpubr,
   lubridate,
-  xlsx
+  xlsx,
+  magick
 Suggests:
   testthat,
     knitr,

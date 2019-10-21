@@ -59,6 +59,16 @@ create_mem_output <- function(conf, date) {
   folder <- fd::results_folder(glue::glue("mem_{x_tag}"), date)
   fs::dir_create(folder)
 
+
+  #ILI for norway
+
+  ili_out <- fd::tbl("spuls_mem_results") %>%
+    dplyr::filter(location_code == "norge", tag == x_tag) %>%
+    dplyr::select(year, year_week=yrwk, week, season, percent_ili=rate,
+                  season_week=x,
+                  ili_consultations=n, total_consultations=denominator, status) %>% dplyr::collect()
+  readr::write_csv(ili_out, glue::glue("{folder}/ili_data.csv"))
+            
   out_data <- data %>%
     dplyr::mutate(
       rate = round(rate, 2),
@@ -68,6 +78,8 @@ create_mem_output <- function(conf, date) {
   setDT(out_data)
 
 
+
+  
   overview <- dcast(out_data, yrwk + week ~ loc_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
 
@@ -212,7 +224,7 @@ create_mem_output <- function(conf, date) {
         ),
         aes(long, lat, label = txt), size = 3
       ) +
-      coord_map(projection = "conic", par = 55)
+  coord_map(projection = "conic", par = 55, xlim=c(4.5,31))
     legend <- cowplot::get_legend(map_plot)
 
     oslo_akershus <- ggplot() +
@@ -240,11 +252,14 @@ create_mem_output <- function(conf, date) {
     filename_legend <- fs::path(folder, glue::glue("map_week_{xyrwk}_legend.png"))
     grDevices::png(filename, width = 7, height = 6, units = "in", res = 800)
     grid::grid.newpage()
-    vpb_ <- grid::viewport(width = 1, height = 1, x = 0.5, y = 0.5) # the larger map
+    vpb_ <- grid::viewport(width = 1.2, height = 1, x = 0.5, y = 0.5, clip=TRUE) # the larger map
     vpa_ <- grid::viewport(width = 0.3, height = 0.3, x = 0.6, y = 0.3)
     print(map_plot + theme(legend.position = "none"), vp = vpb_)
     print(oslo_akershus, vp = vpa_)
     grDevices::dev.off()
+    image <- magick::image_read(filename)
+    image <- magick::image_crop(image, "3760x4800+680+0")
+    magick::image_write(image, filename, format="png")
     ggsave(filename_legend, ggpubr::as_ggplot(legend), height = 3, width = 3)
   }
 
