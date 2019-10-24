@@ -32,6 +32,8 @@ amort <- R6::R6Class(
       amort_table_1()
       amort_rr_graphs()
 
+      fd::create_latest_folder("amort", amort_date())
+
       # send email
       if (actions[["ui_amort"]]$can_perform_action()) {
         amort_email_results()
@@ -59,14 +61,102 @@ amort <- R6::R6Class(
   )
 )
 
+amort_date <- function(){
+  fd::get_rundate()[package == "brain_amort"]$date_extraction
+}
+
 amort_folder <- function() {
-  fd::results_folder("amort", fd::get_rundate()[package == "brain_amort"]$date_extraction)
+  fd::results_folder("amort", amort_date())
 }
 
 amort_season_graphs <- function() {
   d <- fd::tbl("brain_amort_results") %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
+  d[exposure %in% c(
+    "A_H1N1_per1000",
+    "A_H3N2_per1000",
+    "B_per1000"
+    ),exposure:="ils_with_virology"]
+  d <- d[,.(
+    attr_est=sum(attr_est),
+    attr_low=sum(attr_low),
+    attr_high=sum(attr_high)
+  ),keyby=.(
+    location_code,
+    season,
+    yrwk,
+    date,
+    exposure,
+    exposure_value
+  )]
+
+  dates <- unique(d[,c("season", "date")])
+  setorder(dates, date)
+  d[,season:=factor(season, levels = dates$season)]
+
+  q <- ggplot(d, aes(x=season, y=attr_est, ymin=attr_low, ymax=attr_high, color = exposure_value))
+  q <- q + geom_pointrange()
+  q <- q + fhiplot::theme_fhi_lines()
+  q <- q + fhiplot::set_x_axis_vertical()
+  q
+
+  mem <- fd::tbl("spuls_mem_results") %>%
+    dplyr::filter(tag == "influensa") %>%
+    dplyr::filter(location_code == "norge") %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+  mem[,status:=factor(
+    status,
+    levels=c(
+      "veryhigh",
+      "high",
+      "medium",
+      "low",
+      "verylow"
+    ),
+    ordered=T
+    )]
+  mem <- mem[,.(
+    max_ils = max(rate),
+    status = min(status)
+  ), keyby=.(
+    location_code,
+    season
+  )]
+  d[mem,on=c(
+    "location_code",
+    "season"
+  ),max_ils:=max_ils]
+  d[mem,on=c(
+    "location_code",
+    "season"
+  ),mem_status:=status]
+
+
+  fake_data <- d[exposure=="ili_per10000"]
+  fake_data[c(1:5),mem_status:=c(
+    "veryhigh",
+    "high",
+    "medium",
+    "low",
+    "verylow"
+  )]
+
+  q <- ggplot(d[exposure=="ili_per10000"], aes(
+    x=max_ils,
+    y=attr_est,
+    ymin=attr_low,
+    ymax=attr_high))
+  q <- q + geom_pointrange(size=1.5)
+  q <- q + geom_point(data=fake_data,mapping=aes(color=mem_status),alpha=0)
+  q <- q + geom_point(mapping=aes(color=mem_status),size=5)
+  q <- q + ggrepel::geom_label_repel(mapping=aes(label=season))
+  q <- q + fhiplot::scale_color_fhi(palette="map_div_complete", direction = -1)
+  q <- q + fhiplot::theme_fhi_lines()
+  q <- q + scale_x_continuous("Max weekly percentage of consultations that are ILS")
+  q <- q + scale_y_continuous("Estimated attributable mortality")
+  fhiplot::save_a4(q, fs::path(amort_folder(), "fig3.png"), landscape = T)
 }
 
 amort_table_1 <- function() {
