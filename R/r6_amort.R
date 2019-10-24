@@ -32,6 +32,8 @@ amort <- R6::R6Class(
       amort_table_1()
       amort_rr_graphs()
 
+      fd::create_latest_folder("amort", amort_date())
+
       # send email
       if (actions[["ui_amort"]]$can_perform_action()) {
         amort_email_results()
@@ -59,8 +61,12 @@ amort <- R6::R6Class(
   )
 )
 
+amort_date <- function(){
+  fd::get_rundate()[package == "brain_amort"]$date_extraction
+}
+
 amort_folder <- function() {
-  fd::results_folder("amort", fd::get_rundate()[package == "brain_amort"]$date_extraction)
+  fd::results_folder("amort", amort_date())
 }
 
 amort_season_graphs <- function() {
