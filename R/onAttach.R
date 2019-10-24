@@ -1,6 +1,6 @@
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage("PACKAGE: ui")
-  packageStartupMessage("Version 2019.10.21 at 17:34")
+  packageStartupMessage("Version 2019.10.24 at 06:14")
   packageStartupMessage(glue::glue("Developed by Richard White, Gunnar R{fhi::nb$oe}"))
   packageStartupMessage("Norwegian Institute of Public Health")
 }

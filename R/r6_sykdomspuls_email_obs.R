@@ -43,18 +43,18 @@ EmailExternalGenerateTable <- function(results, xtag) {
     return(sprintf("<br><b>%s:</b> <span style='color:red;text-decoration:underline;'>Ingen utbrudd registrert</span><br><br>", sykdomspuls::CONFIG$SYNDROMES[tag == xtag]$namesLong))
   }
 
-  r_long[, excessp := round(pmax(0, n-threshold2))]
+  r_long[, excessp := round(pmax(0, n - threshold2))]
   r_long[, zscorep := fhiplot::format_nor(zscore, 1)]
 
   r_wide <- dcast.data.table(
     r_long,
     tag_pretty + link + age ~ week_id,
     value.var = c("n", "excessp", "threshold2", "zscore", "zscorep")
-    )
+  )
   setorder(r_wide, -zscore_4)
 
-  yrwks <- unique(r_long[,c('week_id',"yrwk")])
-  setorder(yrwks,week_id)
+  yrwks <- unique(r_long[, c("week_id", "yrwk")])
+  setorder(yrwks, week_id)
 
   tab <- huxtable::huxtable(
     Syndrom = r_wide$tag_pretty,
@@ -72,23 +72,24 @@ EmailExternalGenerateTable <- function(results, xtag) {
     `zscore_2` = r_wide$zscorep_2,
     `zscore_3` = r_wide$zscorep_3,
     `zscore_4` = r_wide$zscorep_4
-  ) %>% huxtable::add_colnames() %>%
+  ) %>%
+    huxtable::add_colnames() %>%
     fhiplot::huxtable_theme_fhi_basic()
 
   # coloring in
-  for(i in 1:4){
+  for (i in 1:4) {
     z <- glue::glue("zscore_{i}")
     column_to_color <- c(3, 7, 11) + i
     index_low <- which(r_wide[[z]] < 2) + 1
     index_med <- which(r_wide[[z]] >= 2 & r_wide[[z]] < 4) + 1
     index_hig <- which(r_wide[[z]] >= 4) + 1
 
-    if(length(index_low)>0) huxtable::background_color(tab)[index_low, column_to_color] <- fhiplot::warning_color[["low"]]
-    if(length(index_med)>0) huxtable::background_color(tab)[index_med, column_to_color] <- fhiplot::warning_color[["med"]]
-    if(length(index_hig)>0) huxtable::background_color(tab)[index_hig, column_to_color] <- fhiplot::warning_color[["hig"]]
+    if (length(index_low) > 0) huxtable::background_color(tab)[index_low, column_to_color] <- fhiplot::warning_color[["low"]]
+    if (length(index_med) > 0) huxtable::background_color(tab)[index_med, column_to_color] <- fhiplot::warning_color[["med"]]
+    if (length(index_hig) > 0) huxtable::background_color(tab)[index_hig, column_to_color] <- fhiplot::warning_color[["hig"]]
   }
 
-  tab[1,] <- c(
+  tab[1, ] <- c(
     "Syndrom",
     "Geografisk omr\u00E5de",
     "Alder",
@@ -112,8 +113,8 @@ EmailExternalGenerateTable <- function(results, xtag) {
   tab <- huxtable::merge_cells(tab, 1, 12:15)
   tab[1, 12] <- "Z-verdi<sup>3</sup>"
 
-  huxtable::left_border(tab)[, c(4,8,12)] <- 5
-  huxtable::left_border_style(tab)[, c(4,8,12)] <- "double"
+  huxtable::left_border(tab)[, c(4, 8, 12)] <- 5
+  huxtable::left_border_style(tab)[, c(4, 8, 12)] <- "double"
 
   huxtable::align(tab) <- "center"
 
@@ -127,7 +128,7 @@ EmailExternalGenerateTable <- function(results, xtag) {
   ), border = 0)
   nr1 <- nrow(tab)
 
-  huxtable::escape_contents(tab)[1, c(8,12)] <- F
+  huxtable::escape_contents(tab)[1, c(8, 12)] <- F
   huxtable::escape_contents(tab)[nr0:nr1, ] <- F
 
   return(huxtable::to_html(tab))
@@ -136,7 +137,7 @@ EmailExternalGenerateTable <- function(results, xtag) {
 #' Sends an external email warning about alters
 sykdomspuls_obs_email_external <- function() {
   max_date <- fd::get_rundate()[package == "sykdomspuls"]$date_results
-  yrwks <- fhi::isoyearweek(max_date-c(0,7,14,21))
+  yrwks <- fhi::isoyearweek(max_date - c(0, 7, 14, 21))
   tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   results <- fd::tbl("spuls_standard_results") %>%
@@ -145,13 +146,13 @@ sykdomspuls_obs_email_external <- function() {
     dplyr::filter(tag %in% !!tag_relevant) %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
-  results[,to_keep := FALSE]
-  results[status!="Normal", to_keep:=TRUE]
-  results[,to_keep:=as.logical(max(to_keep)),by=.(tag, location_code, age)]
-  results <- results[to_keep==TRUE]
-  results[, to_keep:=NULL]
+  results[, to_keep := FALSE]
+  results[status != "Normal", to_keep := TRUE]
+  results[, to_keep := as.logical(max(to_keep)), by = .(tag, location_code, age)]
+  results <- results[to_keep == TRUE]
+  results[, to_keep := NULL]
   setorder(results, tag, location_code, age, yrwk)
-  results[,week_id:=1:.N, by=.(tag, location_code, age)]
+  results[, week_id := 1:.N, by = .(tag, location_code, age)]
 
   alerts <- sykdomspuls_obs_get_emails()
   setDT(alerts)
@@ -240,10 +241,10 @@ sykdomspuls_obs_email_external <- function() {
     for (i in 1:nrow(a)) {
       # first get all of the data
       temp <- results[stringr::str_detect(location_code, a$location[i])]
-      temp[,to_keep:=FALSE]
-      temp[status %in% a$statuses[[i]],to_keep:=TRUE]
-      temp[,to_keep:=as.logical(max(to_keep)),by=.(tag, location_code, age)]
-      temp <- temp[to_keep==TRUE]
+      temp[, to_keep := FALSE]
+      temp[status %in% a$statuses[[i]], to_keep := TRUE]
+      temp[, to_keep := as.logical(max(to_keep)), by = .(tag, location_code, age)]
+      temp <- temp[to_keep == TRUE]
       r[[i]] <- temp
     }
     r <- rbindlist(r)
