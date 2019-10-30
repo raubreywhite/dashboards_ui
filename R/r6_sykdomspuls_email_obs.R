@@ -49,7 +49,7 @@ EmailExternalGenerateTable <- function(results, xtag) {
   r_wide <- dcast.data.table(
     r_long,
     tag_pretty + link + age ~ week_id,
-    value.var = c("n", "excessp", "threshold2", "zscore", "zscorep")
+    value.var = c("n", "excessp", "threshold2", "zscore", "zscorep", "status")
   )
   setorder(r_wide, -zscore_4)
 
@@ -78,11 +78,11 @@ EmailExternalGenerateTable <- function(results, xtag) {
 
   # coloring in
   for (i in 1:4) {
-    z <- glue::glue("zscore_{i}")
+    z <- glue::glue("status_{i}")
     column_to_color <- c(3, 7, 11) + i
-    index_low <- which(r_wide[[z]] < 2) + 1
-    index_med <- which(r_wide[[z]] >= 2 & r_wide[[z]] < 4) + 1
-    index_hig <- which(r_wide[[z]] >= 4) + 1
+    index_low <- which(r_wide[[z]] == "Normal") + 1
+    index_med <- which(r_wide[[z]] == "Medium") + 1
+    index_hig <- which(r_wide[[z]] == "High") + 1
 
     if (length(index_low) > 0) huxtable::background_color(tab)[index_low, column_to_color] <- fhiplot::warning_color[["low"]]
     if (length(index_med) > 0) huxtable::background_color(tab)[index_med, column_to_color] <- fhiplot::warning_color[["med"]]
@@ -123,8 +123,8 @@ EmailExternalGenerateTable <- function(results, xtag) {
     "<sup>1</sup>Differansen mellom antall registrete og {fhi::nb$oe}vre grense for normalt antall<sup>2</sup><br>",
     "<sup>2</sup>95% prediksjonsintervall<br>",
     "<sup>3</sup>Z-verdi: antall ganger standardaviket verdien er fra forventet antall konsultasjoner<br>",
-    "<sup>3</sup>Z-verdi mellom 2 og 4 indikerer at det er et h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som gul)<br>",
-    "<sup>3</sup>Z-verdi >= 4 indikerer at det er et betydlig h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som r{fhi::nb$oe}d)<br>",
+    "<sup>3</sup>Z-verdi mellom 2 og 4 og flere enn 2,5 meldte tilfeller indikerer at det er et h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som gul)<br>",
+    "<sup>3</sup>Z-verdi >= 4 og flere enn 3 meldte tilfeller indikerer at det er et betydlig h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som r{fhi::nb$oe}d)<br>",
   ), border = 0)
   nr1 <- nrow(tab)
 
