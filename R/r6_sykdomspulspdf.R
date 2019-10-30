@@ -68,11 +68,19 @@ sykdomspulspdf_run_all <- function() {
     file_before <- glue::glue("child_{tag}.Rmd")
     files_after <- glue::glue("{locs$county_code}_child_{tag}.Rmd")
     for (i in seq_along(files_after)) {
-      file.copy(
-        from = system.file("extdata", "sykdomspulspdf", file_before, package = "ui"),
-        to = fs::path(sykdomspulspdf_folder("rmarkdown"), files_after[i]),
-        overwrite = !fd::config$is_production
-      )
+      if(file.exists(system.file("extdata", "sykdomspulspdf", files_after[i], package = "ui"))){
+        file.copy(
+          from = system.file("extdata", "sykdomspulspdf", files_after[i], package = "ui"),
+          to = fs::path(sykdomspulspdf_folder("rmarkdown"), files_after[i]),
+          overwrite = !fd::config$is_production
+        )
+      } else {
+        file.copy(
+          from = system.file("extdata", "sykdomspulspdf", file_before, package = "ui"),
+          to = fs::path(sykdomspulspdf_folder("rmarkdown"), files_after[i]),
+          overwrite = !fd::config$is_production
+        )
+      }
     }
 
     fhi::sykdompulspdf_resources_copy(sykdomspulspdf_folder("rmarkdown"))
@@ -175,7 +183,7 @@ sykdomspulspdf_plot_total <- function(location_code, x_tag) {
   q <- q + geom_line(data = data_long[season == max(season)], lwd = 1.5)
   q <- q + fhiplot::theme_fhi_basic(10)
   q <- q + fhiplot::scale_color_fhi("", palette = "combination", direction = -1)
-  q <- q + guides(color = guide_legend(reverse = TRUE))
+  q <- q + guides(color = guide_legend(reverse = FALSE))
   q <- q + expand_limits(y = 0)
   q <- q + scale_y_continuous("Antall konsultasjoner", expand = expand_scale(mult = c(0, 0.1)))
   q <- q + scale_x_continuous(
