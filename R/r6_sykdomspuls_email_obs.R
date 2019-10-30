@@ -123,8 +123,8 @@ EmailExternalGenerateTable <- function(results, xtag) {
     "<sup>1</sup>Differansen mellom antall registrete og {fhi::nb$oe}vre grense for normalt antall<sup>2</sup><br>",
     "<sup>2</sup>95% prediksjonsintervall<br>",
     "<sup>3</sup>Z-verdi: antall ganger standardaviket verdien er fra forventet antall konsultasjoner<br>",
-    "<sup>3</sup>Z-verdi mellom 2 og 4 indikerer at det er et h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som gul)<br>",
-    "<sup>3</sup>Z-verdi >= 4 indikerer at det er et betydlig h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som r{fhi::nb$oe}d)<br>",
+    "<sup>3</sup>Z-verdi mellom 2 og 4 og flere enn 2,5 meldte tilfeller indikerer at det er et h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som gul)<br>",
+    "<sup>3</sup>Z-verdi >= 4 og flere enn 3 meldte tilfeller indikerer at det er et betydlig h{fhi::nb$oe}yere antall meldte tilfeller enn normalt (vist som r{fhi::nb$oe}d)<br>",
   ), border = 0)
   nr1 <- nrow(tab)
 
