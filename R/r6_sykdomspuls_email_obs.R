@@ -43,7 +43,7 @@ EmailExternalGenerateTable <- function(results, xtag) {
     return(sprintf("<br><b>%s:</b> <span style='color:red;text-decoration:underline;'>Ingen utbrudd registrert</span><br><br>", sykdomspuls::CONFIG$SYNDROMES[tag == xtag]$namesLong))
   }
 
-  r_long[, excessp := round(pmax(0, n - threshold2))]
+  r_long[, excessp := ceiling(pmax(0, n - threshold2))]
   r_long[, zscorep := fhiplot::format_nor(zscore, 1)]
 
   r_wide <- dcast.data.table(
