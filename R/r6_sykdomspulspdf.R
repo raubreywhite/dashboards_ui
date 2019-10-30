@@ -68,7 +68,7 @@ sykdomspulspdf_run_all <- function() {
     file_before <- glue::glue("child_{tag}.Rmd")
     files_after <- glue::glue("{locs$county_code}_child_{tag}.Rmd")
     for (i in seq_along(files_after)) {
-      if(file.exists(system.file("extdata", "sykdomspulspdf", files_after[i], package = "ui"))){
+      if (file.exists(system.file("extdata", "sykdomspulspdf", files_after[i], package = "ui"))) {
         file.copy(
           from = system.file("extdata", "sykdomspulspdf", files_after[i], package = "ui"),
           to = fs::path(sykdomspulspdf_folder("rmarkdown"), files_after[i]),
