@@ -4,7 +4,7 @@ location_code <- "{{location_code}}"
 location_name <- fhidata::norway_locations_current[county_code==location_code]$county_name[1]
 ```
 
-# Luftveisinfeksjoner, `r f` {-}
+# Luftveisinfeksjoner, `r location_name` {-}
 \begingroup\small
 Denne rapporten baseres på Sykdomspulsen som er et overvåkningssystem som innhenter anonyme diagnosedata fra primærlegene og legevakten.  
 
