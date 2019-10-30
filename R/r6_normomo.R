@@ -90,7 +90,7 @@ normomo_email_results <- function() {
     "Registrert\\textsuperscript{1}" = d$nb,
     "Korrigert\\textsuperscript{2}" = round(d$nbc),
     "Z-score\\textsuperscript{3}" = fhiplot::format_nor(d$zscore, 2),
-    "Overd\u00F8delighet\\textsuperscript{4}" = round(d$excessp),
+    "Overd\u00F8delighet\\textsuperscript{4}" = ceiling(d$excessp),
     "Normalt\\textsuperscript{5}" = glue::glue("{round(d$thresholdp_0)} - {round(d$thresholdp_1)}"),
     "Forh\u00F8yet" = glue::glue("{round(d$thresholdp_1)} - {round(d$thresholdp_2)}"),
     "Betydelig forh\u00F8yet" = glue::glue(">{round(d$thresholdp_2)}")
