@@ -214,7 +214,7 @@ create_mem_output <- function(conf, date) {
       coord_map(projection = "conic", par = 55, xlim = c(4.5, 31))
     legend <- cowplot::get_legend(map_plot)
 
-    if(fd::config$border==2019){
+    if (fd::config$border == 2019) {
       insert_title <- "Oslo og Akershus"
     } else {
       insert_title <- "Oslo"

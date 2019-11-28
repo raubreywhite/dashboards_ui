@@ -238,11 +238,11 @@ normomo_graphs <- function() {
       folder = folder
     )
 
-    #normomo_graphs_deaths_with_age_subgroups(
+    # normomo_graphs_deaths_with_age_subgroups(
     #  loc_code = loc_code,
     #  data = data,
     #  folder = folder
-    #)
+    # )
   }
 
   normomo_tiles_geo(folder)
@@ -561,20 +561,19 @@ GraphTogether <- function(
 
 
 normomo_graphs_deaths_with_age_subgroups <- function(
-  loc_code,
-  data,
-  folder
-){
+                                                     loc_code,
+                                                     data,
+                                                     folder) {
   yrwks <- unique(rev(sort(raw_data$yrwk)))[1:12]
 
-  pd_results <- data[yrwk %in% yrwks & age=="Total"]
+  pd_results <- data[yrwk %in% yrwks & age == "Total"]
   pd_data <- raw_data[yrwk %in% yrwks]
-  pd_data[pd_results,on=c("yrwk","age"),nb:=nbc]
-  pd_data[age!="Total",age:=glue::glue("{age} (r{fhi::nb$aa})",age=age)]
-  pd_data[age=="Total",age:=glue::glue("{age} (korrigert)",age=age)]
+  pd_data[pd_results, on = c("yrwk", "age"), nb := nbc]
+  pd_data[age != "Total", age := glue::glue("{age} (r{fhi::nb$aa})", age = age)]
+  pd_data[age == "Total", age := glue::glue("{age} (korrigert)", age = age)]
 
-  pd_results[,x:=1:.N]
-  pd_data[,x:=1:.N,by=.(age)]
+  pd_results[, x := 1:.N]
+  pd_data[, x := 1:.N, by = .(age)]
 
 
   pd_results[, ymax := max(nbc, UPIb4)]
@@ -586,15 +585,15 @@ normomo_graphs_deaths_with_age_subgroups <- function(
 
   breaks <- pd_results
 
-  q <- ggplot(mapping=aes(x=x))
-  #q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = Lower, ymax = UPIb2), fill=fhiplot::warning_color[["low"]])
-  q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = UPIb2, ymax = UPIb4), fill=fhiplot::warning_color[["med"]])
-  q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = UPIb4, ymax = Inf), fill=fhiplot::warning_color[["hig"]])
-  q <- q + geom_line(data=pd_data, mapping=aes(y=nb,group=age),lwd=1)
-  q <- q + geom_point(data=pd_data, mapping=aes(y=nb),size=3)
-  q <- q + geom_point(data=pd_data, mapping=aes(y=nb, color=age),size=2)
-  q <- q + scale_x_continuous(breaks=breaks$x, labels = breaks$yrwk)
-  q <- q + fhiplot::scale_color_fhi(palette="combination")
+  q <- ggplot(mapping = aes(x = x))
+  # q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = Lower, ymax = UPIb2), fill=fhiplot::warning_color[["low"]])
+  q <- q + geom_ribbon(data = pd_results, mapping = aes(ymin = UPIb2, ymax = UPIb4), fill = fhiplot::warning_color[["med"]])
+  q <- q + geom_ribbon(data = pd_results, mapping = aes(ymin = UPIb4, ymax = Inf), fill = fhiplot::warning_color[["hig"]])
+  q <- q + geom_line(data = pd_data, mapping = aes(y = nb, group = age), lwd = 1)
+  q <- q + geom_point(data = pd_data, mapping = aes(y = nb), size = 3)
+  q <- q + geom_point(data = pd_data, mapping = aes(y = nb, color = age), size = 2)
+  q <- q + scale_x_continuous(breaks = breaks$x, labels = breaks$yrwk)
+  q <- q + fhiplot::scale_color_fhi(palette = "combination")
   q <- q + fhiplot::theme_fhi_lines()
   q <- q + fhiplot::set_x_axis_vertical()
   q
