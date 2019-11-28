@@ -1,7 +1,7 @@
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 x_tag <- "{{x_tag}}"
 location_code <- "{{location_code}}"
-location_name <- fhidata::norway_locations_current[county_code==location_code]$county_name[1]
+location_name <- fd::norway_locations()[county_code==location_code]$county_name[1]
 ```
 
 # Luftveisinfeksjoner, `r location_name` {-}
