@@ -219,7 +219,7 @@ create_mem_output <- function(conf, date) {
     } else {
       insert_title <- "Oslo"
     }
-    insert_title <-
+
     insert <- ggplot() +
       geom_polygon(
         data = plot_data[location_code %in% c("county03", "county02")],
