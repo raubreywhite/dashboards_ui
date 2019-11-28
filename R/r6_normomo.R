@@ -215,7 +215,7 @@ normomo_graphs <- function() {
   folder <- fd::path("results", normomo_yrwk(), "graphs_status", package = "normomo")
   fs::dir_create(folder)
 
-  locs <- c("norge", unique(fhidata::norway_locations_current$county_code))
+  locs <- c("norge", unique(fd::norway_locations()$county_code))
 
   pb <- fhi::txt_progress_bar(min = 0, max = length(locs))
   for (i in seq_along(locs)) {
@@ -227,11 +227,22 @@ normomo_graphs <- function() {
       dplyr::collect() %>%
       fd::latin1_to_utf8()
 
+    raw_data <- fd::tbl("normomo_weekly_data") %>%
+      dplyr::filter(location_code == loc_code) %>%
+      dplyr::collect() %>%
+      fd::latin1_to_utf8()
+
     normomo_graphs_deaths(
       runName = loc_code,
       data = data,
       folder = folder
     )
+
+    #normomo_graphs_deaths_with_age_subgroups(
+    #  loc_code = loc_code,
+    #  data = data,
+    #  folder = folder
+    #)
   }
 
   normomo_tiles_geo(folder)
@@ -314,7 +325,7 @@ normomo_tiles_geo <- function(folder) {
   plotData[nbc < UPIb4, status := "2high"]
   plotData[nbc < UPIb2, status := "3expected"]
 
-  plotData[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
+  plotData[fd::norway_locations_long(), on = "location_code", location_name := location_name]
   plotData <- plotData[!is.na(location_name)]
   unique(plotData$location_code)
   unique(plotData$location_name)
@@ -324,7 +335,7 @@ normomo_tiles_geo <- function(folder) {
     levels = c("0to4", "5to14", "15to64", "65P", "Total"),
     labels = c("0-4", "5-14", "15-64", "65+", "Totalt")
   )]
-  plotData[, location_name := factor(location_name, levels = fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name)]
+  plotData[, location_name := factor(location_name, levels = fd::norway_locations_long()[location_code %in% plotData$location_code]$location_name)]
 
   pretty_labs <- unique(plotData[, c("location_name", "age")])
   setorder(pretty_labs, -location_name, age)
@@ -379,13 +390,13 @@ normomo_tiles_age <- function(folder) {
   plotData[nbc < UPIb4, status := "2high"]
   plotData[nbc < UPIb2, status := "3expected"]
 
-  plotData[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
+  plotData[fd::norway_locations_long(), on = "location_code", location_name := location_name]
   plotData <- plotData[!is.na(location_name)]
   unique(plotData$location_code)
   unique(plotData$location_name)
 
 
-  plotData[, location_name := factor(location_name, levels = rev(fhidata::norway_locations_long_current[location_code %in% plotData$location_code]$location_name))]
+  plotData[, location_name := factor(location_name, levels = rev(fd::norway_locations_long()[location_code %in% plotData$location_code]$location_name))]
   plotData[, age := factor(
     age,
     levels = c("0to4", "5to14", "15to64", "65P", "Total"),
@@ -546,4 +557,45 @@ GraphTogether <- function(
   # q <- SMAOFormatGGPlot(q, legendPos="right", xAngle=90,ncol=1,legendBorder=TRUE)
   # q <- format_plot(q,2,2,stripes=TRUE, xangle=90)
   return(q)
+}
+
+
+normomo_graphs_deaths_with_age_subgroups <- function(
+  loc_code,
+  data,
+  folder
+){
+  yrwks <- unique(rev(sort(raw_data$yrwk)))[1:12]
+
+  pd_results <- data[yrwk %in% yrwks & age=="Total"]
+  pd_data <- raw_data[yrwk %in% yrwks]
+  pd_data[pd_results,on=c("yrwk","age"),nb:=nbc]
+  pd_data[age!="Total",age:=glue::glue("{age} (r{fhi::nb$aa})",age=age)]
+  pd_data[age=="Total",age:=glue::glue("{age} (korrigert)",age=age)]
+
+  pd_results[,x:=1:.N]
+  pd_data[,x:=1:.N,by=.(age)]
+
+
+  pd_results[, ymax := max(nbc, UPIb4)]
+  pd_results[, ymin := min(nbc, UPIb4)]
+  pd_results[, Lower := Pnb - abs(UPIb2 - Pnb)]
+  pd_results[Lower < 0, Lower := 0]
+  pd_results[, unstableEstimates := "Stable"]
+  pd_results[wk >= max(wk) - 7, unstableEstimates := "Unstable"]
+
+  breaks <- pd_results
+
+  q <- ggplot(mapping=aes(x=x))
+  #q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = Lower, ymax = UPIb2), fill=fhiplot::warning_color[["low"]])
+  q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = UPIb2, ymax = UPIb4), fill=fhiplot::warning_color[["med"]])
+  q <- q + geom_ribbon(data=pd_results, mapping=aes(ymin = UPIb4, ymax = Inf), fill=fhiplot::warning_color[["hig"]])
+  q <- q + geom_line(data=pd_data, mapping=aes(y=nb,group=age),lwd=1)
+  q <- q + geom_point(data=pd_data, mapping=aes(y=nb),size=3)
+  q <- q + geom_point(data=pd_data, mapping=aes(y=nb, color=age),size=2)
+  q <- q + scale_x_continuous(breaks=breaks$x, labels = breaks$yrwk)
+  q <- q + fhiplot::scale_color_fhi(palette="combination")
+  q <- q + fhiplot::theme_fhi_lines()
+  q <- q + fhiplot::set_x_axis_vertical()
+  q
 }

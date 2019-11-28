@@ -50,7 +50,7 @@ sykdomspulspdf_run_all <- function() {
   fs::dir_create(sykdomspulspdf_folder("pdf"))
   fs::dir_create(sykdomspulspdf_folder("svg"))
 
-  locs <- unique(fhidata::norway_locations_current[, c("county_code", "county_name")])
+  locs <- unique(fd::norway_locations()[, c("county_code", "county_name")])
 
   for (tag in c("gastro", "respiratoryexternal")) {
     fd::msg(glue::glue("sykdomspulspdf {tag}"), slack = T)

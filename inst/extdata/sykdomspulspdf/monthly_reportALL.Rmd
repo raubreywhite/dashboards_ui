@@ -8,7 +8,7 @@ fig_caption: true
 ---
 
 ```{r results = "asis", echo=FALSE, message=FALSE, warning=FALSE}
-rmd <- sapply(unique(fhidata::norway_locations_current$county_code),
+rmd <- sapply(unique(fd::norway_locations()$county_code),
   function(x) {
     knitr::knit_expand(glue::glue("{x}_child_{params$tag}.Rmd"), location_code = x, x_tag = params$tag)
   }

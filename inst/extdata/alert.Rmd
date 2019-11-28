@@ -16,7 +16,7 @@ editor_options:
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 x_municip_code <- params$location_code
 x_tag <- params$tag
-x_county_code <- fhidata::norway_locations_current[municip_code==x_municip_code]$county_code
+x_county_code <- fd::norway_locations()[municip_code==x_municip_code]$county_code
 x_municip_name <- fhi::get_location_name(x_municip_code)
 
 fd::initialize("sykdomspuls")
@@ -43,7 +43,7 @@ d[,status:=factor(
   levels=c("Normal","Medium","High")
 )]
 
-county_order <- fhidata::norway_locations_long_current[location_code %in% d$location_code]
+county_order <- fd::norway_locations_long()[location_code %in% d$location_code]
 county_order <- rbind(county_order[.N],county_order[-.N])
 county_order <- county_order[.N:1]
 d[,location_name:=factor(location_name, levels=unique(county_order$location_name))]

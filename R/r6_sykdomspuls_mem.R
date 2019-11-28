@@ -75,7 +75,7 @@ create_mem_output <- function(conf, date) {
   out_data <- data %>%
     dplyr::mutate(
       rate = round(rate, 2),
-      loc_name = fhi::get_location_name(location_code)
+      loc_name = fd::get_location_name(location_code)
     ) %>%
     dplyr::select(yrwk, week, loc_name, rate, n, denominator)
   setDT(out_data)
@@ -131,7 +131,7 @@ create_mem_output <- function(conf, date) {
       color_palette = "influensa", legend_control = "text"
     )
 
-    filename <- fs::path(folder, glue::glue("{fhi::get_location_name(loc)}.png"))
+    filename <- fs::path(folder, glue::glue("{fd::get_location_name(loc)}.png"))
 
     ggsave(filename, chart, height = 7, width = 9)
   }
@@ -155,7 +155,7 @@ create_mem_output <- function(conf, date) {
     "Sv\u00E6rt h\u00F8yt"
   ))]
   for (i in 1:nrow(weeks)) {
-    counties <- fhidata::norway_map_counties
+    counties <- fd::norway_map_counties()
     xyrwk <- weeks$yrwk[i]
     plot_data <- counties[data[yrwk == xyrwk], on = .(location_code = location_code), nomatch = 0]
 
@@ -163,24 +163,8 @@ create_mem_output <- function(conf, date) {
     ## plot_data[location_code =="county50", status:="Middels"]
     ## plot_data[location_code =="county10", status:="H\u00F8yt"]
     ## plot_data[location_code =="county02", status:="Sv\u00E6rt h\u00F8yt"]
-    label_positions <- data.frame(
-      location_code = c(
-        "county01", "county02", "county03", "county04",
-        "county05", "county06", "county07", "county08",
-        "county09", "county10", "county11", "county12",
-        "county14", "county15", "county18", "county19",
-        "county20", "county50"
-      ),
-      long = c(
-        11.266137, 11.2, 10.72028, 11.5, 9.248258, 9.3, 10.0, 8.496352,
-        8.45, 7.2, 6.1, 6.5, 6.415354, 7.8, 14.8, 19.244275, 24.7, 11
-      ),
+    label_positions <- fd::norway_map_counties_label_positions()
 
-      lat = c(
-        59.33375, 60.03851, 59.98, 61.26886, 61.25501, 60.3, 59.32481, 59.47989,
-        58.6, 58.4, 58.7, 60.25533, 61.6, 62.5, 66.5, 68.9, 69.6, 63
-      )
-    )
     cnames_whole_country <- plot_data[, .(rate, location_code)][label_positions, on = "location_code"]
 
     cnames_whole_country$rate <- format(round(cnames_whole_country$rate, 1), nsmall = 1)
@@ -230,7 +214,13 @@ create_mem_output <- function(conf, date) {
       coord_map(projection = "conic", par = 55, xlim = c(4.5, 31))
     legend <- cowplot::get_legend(map_plot)
 
-    oslo_akershus <- ggplot() +
+    if(fd::config$border==2019){
+      insert_title <- "Oslo og Akershus"
+    } else {
+      insert_title <- "Oslo"
+    }
+    insert_title <-
+    insert <- ggplot() +
       geom_polygon(
         data = plot_data[location_code %in% c("county03", "county02")],
         aes(x = long, y = lat, group = group, fill = status),
@@ -246,7 +236,7 @@ create_mem_output <- function(conf, date) {
       ), drop = FALSE) +
       geom_text(data = cnames_osl_ak, aes(long, lat, label = rate), size = 2.3) +
       theme(legend.position = "none") +
-      ggtitle("Oslo og Akershus") +
+      ggtitle(insert_title) +
       theme(plot.title = element_text(size = 8, )) +
       coord_map(projection = "conic", par = 55)
 
@@ -258,7 +248,7 @@ create_mem_output <- function(conf, date) {
     vpb_ <- grid::viewport(width = 1.2, height = 1, x = 0.5, y = 0.5, clip = TRUE) # the larger map
     vpa_ <- grid::viewport(width = 0.3, height = 0.3, x = 0.6, y = 0.3)
     print(map_plot + theme(legend.position = "none"), vp = vpb_)
-    print(oslo_akershus, vp = vpa_)
+    print(insert, vp = vpa_)
     grDevices::dev.off()
     image <- magick::image_read(filename)
     image <- magick::image_crop(image, "3760x4800+680+0")
