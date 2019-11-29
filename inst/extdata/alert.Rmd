@@ -17,7 +17,7 @@ editor_options:
 x_municip_code <- params$location_code
 x_tag <- params$tag
 x_county_code <- fd::norway_locations()[municip_code==x_municip_code]$county_code
-x_municip_name <- fhi::get_location_name(x_municip_code)
+x_municip_name <- fd::get_location_name(x_municip_code)
 
 fd::initialize("sykdomspuls")
 
