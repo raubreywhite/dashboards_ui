@@ -258,10 +258,10 @@ amort_rr_graphs <- function() {
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
-  rrs[fhidata::norway_locations_long_current, on = "location_code", location_name := location_name]
+  rrs[fd::norway_locations_long(), on = "location_code", location_name := location_name]
   min_vals <- rrs[rr_est == 1]
 
-  lvls <- c("Norge", unique(fhidata::norway_locations_current$county_name))
+  lvls <- c("Norge", unique(fd::norway_locations()$county_name))
   rrs[, location_name := factor(location_name, levels = lvls)]
 
   q <- ggplot(rrs[exposure == "tx"], aes(x = exposure_value, y = rr_est, ymin = rr_l95, ymax = rr_u95))
