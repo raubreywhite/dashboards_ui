@@ -1,7 +1,7 @@
 ---
-title: "`r params$name_long` i `r fhi::get_location_name(params$location_code)` og nærområdene"
+title: "`r params$name_long` i `r fd::get_location_name(params$location_code)` og nærområdene"
 sub_title: "Sykdomspulsen, `r lubridate::today()`"
-header: "`r params$name_long` i `r fhi::get_location_name(params$location_code)` og nærområdene"
+header: "`r params$name_long` i `r fd::get_location_name(params$location_code)` og nærområdene"
 footer: "Sykdomspulsen, Folkehelseinstituttet, Oslo, Norge"
 output:
   fhi::fhi_document
