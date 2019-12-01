@@ -14,7 +14,7 @@ shinyOptions(cache = diskCache("/tmp/", max_size = 50e6))
 if(Sys.getenv("RSTUDIO") == "1"){
   base_loc <- glue::glue("/dashboards/dashboards_{fd::config$package}")
 } else {
-  base_loc <- "/srv/shiny-server/beta/"
+  base_loc <- "/r/ui/shiny/beta/" # CHANGE THIS WHEN SWITCHING TO PROD!
 }
 
 source(fs::path(base_loc,"global.R"))
