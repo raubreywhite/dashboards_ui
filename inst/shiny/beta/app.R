@@ -1,29 +1,18 @@
 ## app.R ##
 library(shinydashboard)
-library(flexdashboard)
-library(ggplot2)
-library(ggrepel)
 library(data.table)
-library(fhi)
 library(magrittr)
 library(dplyr)
+library(ggplot2)
 
-fd::initialize("sykdomspuls")
 shinyOptions(cache = diskCache("/tmp/", max_size = 50e6))
 
-if(Sys.getenv("RSTUDIO") == "1"){
-  base_loc <- glue::glue("/dashboards/dashboards_{fd::config$package}")
-} else {
-  base_loc <- "/srv/shiny-server/beta/" # CHANGE THIS WHEN SWITCHING TO PROD!
-}
-
-source(fs::path(base_loc,"global.R"))
-source(fs::path(base_loc,"barometer.R"))
-source(fs::path(base_loc,"signals.R"))
-source(fs::path(base_loc,"number_weekly.R"))
-source(fs::path(base_loc,"number_daily.R"))
-source(fs::path(base_loc,"meminfluensa.R"))
-
+source("global.R")
+source("barometer.R")
+source("signals.R")
+source("number_weekly.R")
+source("number_daily.R")
+source("meminfluensa.R")
 
 
 header = dashboardHeader(title = "Sykdomspulsen")

@@ -1,5 +1,4 @@
 library(pool)
-fd::initialize("sykdomspuls")
 
 # load data in 'global' chunk so it can be shared by all users of the dashboard
 pool <- dbPool(
@@ -44,8 +43,8 @@ vals <- unique(fd::norway_locations()[,c("county_code","county_name")])
 GLOBAL$weeklyCounties <- c("Norge", vals$county_code)
 names(GLOBAL$weeklyCounties) <- c("Norge", vals$county_name)
 
-CONFIG_OLD <- ConvertConfigForAPI()
-GLOBAL$weeklyTypes <- GLOBAL$dailyTypes <- CONFIG_OLD$SYNDROMES[CONFIG_OLD$SYNDROMES %in% CONFIG$STANDARD[websiteInternal == TRUE]$tag]
+CONFIG_OLD <- sykdomspuls::ConvertConfigForAPI()
+GLOBAL$weeklyTypes <- GLOBAL$dailyTypes <- CONFIG_OLD$SYNDROMES[CONFIG_OLD$SYNDROMES %in% sykdomspuls::CONFIG$STANDARD[websiteInternal == TRUE]$tag]
 GLOBAL$weeklyAges <- GLOBAL$dailyAges <- CONFIG_OLD$AGES
 
 vals <- fd::norway_locations_long()[location_code!="norway"]
