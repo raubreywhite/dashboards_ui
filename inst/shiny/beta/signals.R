@@ -161,21 +161,21 @@ signalsUI <- function(id, label = "Counter", GLOBAL) {
         tabPanel(
           title="Fylker",
           box(
-            width=12,
+            width=13,
             tableOutput(ns("table1"))
           )
         ),
         tabPanel(
           title="Kommuner",
           box(
-            width=12,
+            width=13,
             tableOutput(ns("table2"))
           )
         ),
         tabPanel(
           title="Info",
           box(
-            width=12,
+            width=13,
             p("Tabellen viser en oversikt over forekomsten av sykdom/symptom i et valgt tidsrom."),
             p("Valg av tidsrom gjøres på bunnefiguren. Valg av sykdom/symptom gjøres på venstre side. På venstre side kan man også velge Norge eller et fylke i Norge. Hvis man velger Norge vil hvert fylke få en rad i tabellen. Hvis man velger et fylke vil alle kommunene få en rad i tabellen."),
             p("Dersom ruten for en gitt uke er farget med grønn farge betyr det at antall konsultasjoner i den gitte kommunen eller fylket er som forventet denne uken. En gul farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er høyere enn forventet denne uken. En rød farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er betydelig høyere enn forventet denne uken. Fargene er laget ut fra beregninger fra de foregående 5 årene."),

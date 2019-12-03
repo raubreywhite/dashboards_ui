@@ -13,8 +13,8 @@ number_dailyUI <- function(id, label = "Counter", GLOBAL) {
         width=12,
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("dailyNumberPlot"), height="100%"), width=12, style='height:60vh'),
-          box(plotOutput(ns("dailyNumberPlotBrush"), height="100%", brush = brushOpts(ns("dailyNumberBrush"), direction="x", opacity=0.4)), width=12, style='height:200px')
+          box(plotOutput(ns("dailyNumberPlot"), height="100%"), width=13, style='height:60vh'),
+          box(plotOutput(ns("dailyNumberPlotBrush"), height="100%", brush = brushOpts(ns("dailyNumberBrush"), direction="x", opacity=0.4)), width=13, style='height:200px')
         ),
         tabPanel(
           title="Info",

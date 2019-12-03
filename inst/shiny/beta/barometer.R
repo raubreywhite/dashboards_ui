@@ -12,8 +12,8 @@ barometerUI <- function(id, label = "Counter", GLOBAL) {
       tabBox(
         width=12,
         tabPanel(title="Figur",
-          box(plotOutput(ns("weeklyBarometerPlot"), height="100%"), width=12, style='height:60vh'),
-          box(plotOutput(ns("weeklyBarometerPlotBrush"), height="100%", brush = brushOpts(ns("weeklyBarometerBrush"), direction="x", opacity=0.4)), width=12, style='height:200px')
+          box(plotOutput(ns("weeklyBarometerPlot"), height="100%"), width=13, style='height:60vh'),
+          box(plotOutput(ns("weeklyBarometerPlotBrush"), height="100%", brush = brushOpts(ns("weeklyBarometerBrush"), direction="x", opacity=0.4)), width=13, style='height:200px')
         ),
         tabPanel(
           title="Info",

@@ -14,13 +14,13 @@ number_weeklyUI <- function(id, label = "Counter", GLOBAL) {
         width=12,
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("weeklyNumberPlot"), height="100%"), width=12, style='height:60vh'),
-          box(plotOutput(ns("weeklyNumberPlotBrush"), height="100%", brush = brushOpts(ns("weeklyNumberBrush"), direction="x", opacity=0.4)), width=12, style='height:200px')
+          box(plotOutput(ns("weeklyNumberPlot"), height="100%"), width=13, style='height:60vh'),
+          box(plotOutput(ns("weeklyNumberPlotBrush"), height="100%", brush = brushOpts(ns("weeklyNumberBrush"), direction="x", opacity=0.4)), width=13, style='height:200px')
         ),
         tabPanel(
           title="Info",
           box(
-            width=12,
+            width=13,
             p("Grafen viser antall konsultasjoner per uke med en indikasjon om antallet er som forventet eller ikke. Valg av sykdom/symptom, sted og tidsrom gjøres på venstre side. Den svarte streken med rundingene viser antallet faktiske konsultasjoner. Bakgrunnsfargen er laget ut fra beregninger fra de foregående 5 årene i samme geografiske område. Når den svarte streken ligger i den grønne bakgrunnsfargen er antallet konsultasjoner som forventet og rundingen vises med svart. Når den svarte streken ligger i det gule feltet er antall konsultasjoner høyere enn forventet og fyllet i rundingen blir gult. Dersom den svarte streken ligger i det røde feltet er antall konsultasjoner betydelig høyere enn forventet og fyllet i rundingen blir rødt."),
             p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
           )
@@ -71,10 +71,14 @@ number_weeklyServer <- function(input, output, session, GLOBAL) {
         location_code== x_location &
         granularity_time=="weekly" &
         age == x_age) %>%
-      select(date, n, threshold2, threshold4, status) %>%
+      select(date, n, threshold2, threshold4, status,yrwk,denominator) %>%
       collect()
     setDT(retData)
-
+    retData[, location_code:=x_location]
+    retData[, granularity_time:="weekly"]
+    retData[, age:=x_age]
+    retData <- sykdomspuls::calculate_confidence_interval(retData, last_weeks=8)
+    
     retData$top <- max(c(retData$n, retData$threshold4), na.rm = T) + 2
     retData$bottom <- 0
 
