@@ -9,21 +9,19 @@ barometerUI <- function(id, label = "Counter", GLOBAL) {
     ),
     column(
       width=10,
-      tabBox(
-        width=12,
+      tabsetPanel(
         tabPanel(title="Figur",
-          box(plotOutput(ns("weeklyBarometerPlot"), height="100%"), width=12, style='height:60vh'),
-          box(plotOutput(ns("weeklyBarometerPlotBrush"), height="100%", brush = brushOpts(ns("weeklyBarometerBrush"), direction="x", opacity=0.4)), width=12, style='height:200px')
+          br(),
+          div(style='height:60vh;text-align: center',plotOutput(ns("weeklyBarometerPlot"), height="100%")),
+          div(style='height:200px;text-align: center',plotOutput(ns("weeklyBarometerPlotBrush"), height="100%", brush = brushOpts(ns("weeklyBarometerBrush"), direction="x", opacity=0.4)))
         ),
         tabPanel(
           title="Info",
-          box(
-            width=12,
-            p("Tabellen viser en oversikt over forekomsten av sykdom/symptom i et valgt tidsrom."),
-            p("Valg av tidsrom gjøres på tidslinje nederst på siden. Valg av sykdom/symptom gjøres på venstre side. På venstre side kan man også velge Norge eller et fylke i Norge. Hvis man velger Norge vil hvert fylke få en rad i tabellen. Hvis man velger et fylke vil alle kommunene i valgte fylke få en rad i tabellen."),
-            p("Dersom ruten for en gitt uke er farget med grønn farge betyr det at antall konsultasjoner i den gitte kommunen eller fylket er som forventet denne uken. En gul farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er høyere enn forventet denne uken. En rød farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er betydelig høyere enn forventet denne uken. Fargene er laget ut fra beregninger fra de foregående 5 årene i fylke eller kommunen."),
-            p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
-          )
+          br(),
+          p("Tabellen viser en oversikt over forekomsten av sykdom/symptom i et valgt tidsrom."),
+          p("Valg av tidsrom gjøres på tidslinje nederst på siden. Valg av sykdom/symptom gjøres på venstre side. På venstre side kan man også velge Norge eller et fylke i Norge. Hvis man velger Norge vil hvert fylke få en rad i tabellen. Hvis man velger et fylke vil alle kommunene i valgte fylke få en rad i tabellen."),
+          p("Dersom ruten for en gitt uke er farget med grønn farge betyr det at antall konsultasjoner i den gitte kommunen eller fylket er som forventet denne uken. En gul farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er høyere enn forventet denne uken. En rød farge en gitt uke betyr at antall konsultasjoner i den gitte kommunen eller fylket er betydelig høyere enn forventet denne uken. Fargene er laget ut fra beregninger fra de foregående 5 årene i fylke eller kommunen."),
+          p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
         )
       )
     )

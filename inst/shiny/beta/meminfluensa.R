@@ -8,14 +8,15 @@ meminfluensaUI <- function(id, label = "Counter", GLOBAL) {
     ),
     column(
       width=10,
-      tabBox(
-        width=12,
+      tabsetPanel(
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("influensa_plot"), height="100%"), width=12, style='height:80vh')
+          br(),
+          div(style='height:80vh;text-align: center',plotOutput(ns("influensa_plot"), height="100%"))
         ),
         tabPanel(
           title="Info",
+          br(),
           p("Info")
         )
       )
