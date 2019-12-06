@@ -25,6 +25,6 @@ test_that("Basic example", {
   #   alerts = alerts
   # )
 
-  #testthat::expect_equal(nrow(res), 1)
+  # testthat::expect_equal(nrow(res), 1)
   testthat::expect_equal(1, 1)
 })

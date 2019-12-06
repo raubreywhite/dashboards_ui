@@ -31,7 +31,7 @@ amort <- R6::R6Class(
       fs::dir_create(amort_folder())
       amort_table_1()
       amort_table_2()
-      #amort_rr_graphs()
+      # amort_rr_graphs()
 
       fd::create_latest_folder("amort", amort_date())
 
@@ -177,20 +177,21 @@ amort_table_1 <- function() {
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
-  attrib_flumomo[,excess_point := excess_est - shift(excess_est),by=.(
-    tag_outcome, tag_exposure,location_code, season)]
-  attrib_flumomo[is.na(excess_point), excess_point:=excess_est]
-  attrib_flumomo[,excess_point:=fhiplot::format_nor(excess_point)]
+  attrib_flumomo[, excess_point := excess_est - shift(excess_est), by = .(
+    tag_outcome, tag_exposure, location_code, season
+  )]
+  attrib_flumomo[is.na(excess_point), excess_point := excess_est]
+  attrib_flumomo[, excess_point := fhiplot::format_nor(excess_point)]
 
-  attrib_flumomo[,excess_cum:=glue::glue(
+  attrib_flumomo[, excess_cum := glue::glue(
     "{est} ({l}, {u})",
     est = fhiplot::format_nor(excess_est),
     l = fhiplot::format_nor(excess_lower),
     u = fhiplot::format_nor(excess_upper),
   )]
 
-  attrib_flumomo[week>=21 & week<=39 & tag_exposure=="ili", excess_point := "-"]
-  attrib_flumomo[week>=21 & week<=39 & tag_exposure=="ili", excess_cum := "-"]
+  attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_point := "-"]
+  attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_cum := "-"]
 
   mem <- fd::tbl("spuls_mem_results") %>%
     dplyr::filter(location_code == "norge") %>%
@@ -211,10 +212,10 @@ amort_table_1 <- function() {
   d[weather, on = c("yrwk", "location_code"), tn_mean := tn_mean]
   d[mem, on = c("yrwk", "location_code"), ils_rate := rate]
   d[mem, on = c("yrwk", "location_code"), ils_status := i.status]
-  d[attrib_flumomo[tag_exposure=="ili"], on = c("yrwk"), ils_excess_cum := excess_cum]
-  d[attrib_flumomo[tag_exposure=="ili"], on = c("yrwk"), ils_excess_point := excess_point]
-  d[attrib_flumomo[tag_exposure=="tg"], on = c("yrwk"), tg_excess_cum := excess_cum]
-  d[attrib_flumomo[tag_exposure=="tg"], on = c("yrwk"), tg_excess_point := excess_point]
+  d[attrib_flumomo[tag_exposure == "ili"], on = c("yrwk"), ils_excess_cum := excess_cum]
+  d[attrib_flumomo[tag_exposure == "ili"], on = c("yrwk"), ils_excess_point := excess_point]
+  d[attrib_flumomo[tag_exposure == "tg"], on = c("yrwk"), tg_excess_cum := excess_cum]
+  d[attrib_flumomo[tag_exposure == "tg"], on = c("yrwk"), tg_excess_point := excess_point]
 
   tab <- huxtable::hux(
     "\u00C5r-uke" = d$yrwk,
@@ -273,8 +274,8 @@ amort_table_1 <- function() {
 
 
 
-  #tab <- huxtable::merge_cells(tab, 2, 3:5)
-  #tab[2, 3] <- "Temperatur\\textsuperscript{2}"
+  # tab <- huxtable::merge_cells(tab, 2, 3:5)
+  # tab[2, 3] <- "Temperatur\\textsuperscript{2}"
 
   nr0 <- nrow(tab) + 1
 
@@ -304,7 +305,6 @@ amort_table_1 <- function() {
   print(tab1)
   # tab1 <- fs::path("/git", tab1_name)
   fd::huxtable_to_png(tab, file = tab1)
-
 }
 
 amort_table_2 <- function() {
@@ -314,27 +314,28 @@ amort_table_2 <- function() {
     dplyr::collect() %>%
     fd::latin1_to_utf8()
 
-  attrib_flumomo[,excess_point := excess_est - shift(excess_est),by=.(
-    tag_outcome, tag_exposure,location_code, season)]
-  attrib_flumomo[is.na(excess_point), excess_point:=excess_est]
-  attrib_flumomo[,excess_point:=fhiplot::format_nor(excess_point)]
+  attrib_flumomo[, excess_point := excess_est - shift(excess_est), by = .(
+    tag_outcome, tag_exposure, location_code, season
+  )]
+  attrib_flumomo[is.na(excess_point), excess_point := excess_est]
+  attrib_flumomo[, excess_point := fhiplot::format_nor(excess_point)]
 
-  attrib_flumomo[,excess_cum:=glue::glue(
+  attrib_flumomo[, excess_cum := glue::glue(
     "{est} ({l}, {u})",
     est = fhiplot::format_nor(excess_est),
     l = fhiplot::format_nor(excess_lower),
     u = fhiplot::format_nor(excess_upper),
   )]
 
-  attrib_flumomo[week>=21 & week<=39 & tag_exposure=="ili", excess_point := "-"]
-  attrib_flumomo[week>=21 & week<=39 & tag_exposure=="ili", excess_cum := "-"]
+  attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_point := "-"]
+  attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_cum := "-"]
 
   today_yrwk <- max(attrib_flumomo$yrwk)
-  today_week <- attrib_flumomo[yrwk==today_yrwk]$week[1]
-  d_week <- attrib_flumomo[week==today_week]
+  today_week <- attrib_flumomo[yrwk == today_yrwk]$week[1]
+  d_week <- attrib_flumomo[week == today_week]
   d_total <- attrib_flumomo[season %in% unique(d_week$season)]
-  d_total[,mxyrwk := max(yrwk),by=.(season)]
-  d_total <- d_total[yrwk==mxyrwk]
+  d_total[, mxyrwk := max(yrwk), by = .(season)]
+  d_total <- d_total[yrwk == mxyrwk]
 
   tab_total <- dcast.data.table(d_total, season ~ tag_exposure, value.var = "excess_cum")
   tab_week <- dcast.data.table(d_week, season ~ tag_exposure, value.var = "excess_cum")
@@ -342,8 +343,8 @@ amort_table_2 <- function() {
   setorder(tab_total, -season)
   setorder(tab_week, -season)
 
-  tab_total[1,ili:="-"]
-  tab_total[1,tg:="-"]
+  tab_total[1, ili := "-"]
+  tab_total[1, tg := "-"]
 
   tab <- huxtable::hux(
     "Sesong" = tab_total$season,
@@ -399,7 +400,6 @@ amort_table_2 <- function() {
   print(tab2)
   # tab1 <- fs::path("/git", tab1_name)
   fd::huxtable_to_png(tab, file = tab2)
-
 }
 
 amort_rr_graphs <- function() {
