@@ -136,7 +136,7 @@ normomo_email_results <- function() {
     "\\textsuperscript{1}Antall registrerte d{fhi::nb$oe}dsfall\\\\*",
     "\\textsuperscript{2}Antall registrerte d{fhi::nb$oe}dsfall korrigert for registreringsforsinkelse\\\\*",
     "\\textsuperscript{3}Standardavvik (z-score $\\ge$ 2,0 indikerer at det er et h{fhi::nb$oe}yere antall d{fhi::nb$oe}dsfall enn normalt)\\\\*",
-    "\\textsuperscript{4}Differansen mellom antall korrigerte dødsfall og {fhi::nb$oe}vre grense for normalt antall d{fhi::nb$oe}dsfall\\textsuperscript{5}\\\\*",
+    "\\textsuperscript{4}Differansen mellom antall korrigerte d{fhi::nb$oe}dsfall og {fhi::nb$oe}vre grense for normalt antall d{fhi::nb$oe}dsfall\\textsuperscript{5}\\\\*",
     "\\textsuperscript{5}95\\% prediksjonsintervall"
   ), border = 0)
   nr1 <- nrow(tab)

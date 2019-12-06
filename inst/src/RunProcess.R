@@ -13,5 +13,5 @@ sykdomspuls_alert_pdf$new()$run_with_catch()
 
 sykdomspulspdf$new()$run_with_catch()
 
-#amort$new()$run_with_catch()
+amort$new()$run_with_catch()
 

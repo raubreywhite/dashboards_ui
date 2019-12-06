@@ -28,7 +28,11 @@ Imports:
   ggpubr,
   lubridate,
   xlsx,
-  magick
+  magick,
+  car,
+  ggrepel,
+  lemon,
+  readr
 Suggests:
   testthat,
     knitr,
