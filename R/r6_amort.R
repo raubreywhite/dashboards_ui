@@ -412,11 +412,11 @@ amort_figure_1 <- function() {
 
   attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_est := 0]
 
-  attrib_flumomo[,tag_exposure:=dplyr::recode(
+  attrib_flumomo[, tag_exposure := dplyr::recode(
     tag_exposure,
     "ili" = "ILS",
     "tg" = "Temperatur"
-    )]
+  )]
 
   today_yrwk <- max(attrib_flumomo$yrwk)
   today_week <- attrib_flumomo[yrwk == today_yrwk]$week[1]
@@ -431,46 +431,46 @@ amort_figure_1 <- function() {
   seasons_latest <- seasons[1]
 
   pd <- attrib_flumomo[season %in% seasons]
-  pd[,max_x:=max(x),by=.(tag_exposure, season)]
-  labels <- pd[x==max_x]
+  pd[, max_x := max(x), by = .(tag_exposure, season)]
+  labels <- pd[x == max_x]
 
   x_val_min <- min(pd$x)
   x_val_max <- max(pd$x)
 
-  labs <- unique(pd[,c("week","x")])
-  setorder(labs,x)
-  labs <- labs[week %in% seq(1,52,4)]
+  labs <- unique(pd[, c("week", "x")])
+  setorder(labs, x)
+  labs <- labs[week %in% seq(1, 52, 4)]
 
 
-  q <- ggplot(pd, aes(x=x, y=excess_est, group=season))
-  q <- q + geom_line(size=1)
-  q <- q + geom_line(data=pd[season %in% seasons_colored], mapping=aes(color=season),size=1)
-  q <- q + geom_line(data=pd[season %in% seasons_latest], mapping=aes(color=season), size=3)
+  q <- ggplot(pd, aes(x = x, y = excess_est, group = season))
+  q <- q + geom_line(size = 1)
+  q <- q + geom_line(data = pd[season %in% seasons_colored], mapping = aes(color = season), size = 1)
+  q <- q + geom_line(data = pd[season %in% seasons_latest], mapping = aes(color = season), size = 3)
   q <- q + lemon::facet_rep_wrap(~tag_exposure, repeat.tick.labels = "y")
   q <- q + scale_y_continuous(
     glue::glue("Beregnet tilskrivbar d{fhi::nb$oe}delighet"),
-    breaks = scales::pretty_breaks(n=10),
+    breaks = scales::pretty_breaks(n = 10),
     labels = fhiplot::format_nor
-    )
+  )
   q <- q + scale_x_continuous(
     "Uke",
     breaks = labs$x,
     labels = labs$week,
-    limits=c(x_val_min,x_val_max+10)
-    )
+    limits = c(x_val_min, x_val_max + 10)
+  )
   q <- q + ggrepel::geom_label_repel(
-    data=labels,
-    mapping=aes(label=season),
-    nudge_y      = 0.0,
-    nudge_x      = 8.0,
-    direction    = "y",
-    angle        = 0,
-    vjust        = 0,
+    data = labels,
+    mapping = aes(label = season),
+    nudge_y = 0.0,
+    nudge_x = 8.0,
+    direction = "y",
+    angle = 0,
+    vjust = 0,
     segment.size = 0.2
   )
   q <- q + fhiplot::theme_fhi_lines(base_size = 16, panel_on_top = FALSE)
-  q <- q + fhiplot::scale_color_fhi("Sesong",palette="combination")
-  q <- q + labs(title=glue::glue("Beregnet tilskrivbar d{fhi::nb$oe}delighet"))
+  q <- q + fhiplot::scale_color_fhi("Sesong", palette = "combination")
+  q <- q + labs(title = glue::glue("Beregnet tilskrivbar d{fhi::nb$oe}delighet"))
   q <- q + labs(caption = "Beregnet ved FluMOMO")
   fhiplot::save_a4(q, fs::path(amort_folder(), "fig1.png"))
 }
