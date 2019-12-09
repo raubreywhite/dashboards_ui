@@ -31,6 +31,7 @@ amort <- R6::R6Class(
       fs::dir_create(amort_folder())
       amort_table_1()
       amort_table_2()
+      amort_figure_1()
       # amort_rr_graphs()
 
       fd::create_latest_folder("amort", amort_date())
@@ -402,6 +403,78 @@ amort_table_2 <- function() {
   fd::huxtable_to_png(tab, file = tab2)
 }
 
+amort_figure_1 <- function() {
+  attrib_flumomo <- fd::tbl("brain_flumomo_cumulative_running") %>%
+    dplyr::filter(location_code == "norge") %>%
+    dplyr::filter(age == "Total") %>%
+    dplyr::collect() %>%
+    fd::latin1_to_utf8()
+
+  attrib_flumomo[week >= 21 & week <= 39 & tag_exposure == "ili", excess_est := 0]
+
+  attrib_flumomo[,tag_exposure:=dplyr::recode(
+    tag_exposure,
+    "ili" = "ILS",
+    "tg" = "Temperatur"
+    )]
+
+  today_yrwk <- max(attrib_flumomo$yrwk)
+  today_week <- attrib_flumomo[yrwk == today_yrwk]$week[1]
+  d_week <- attrib_flumomo[week == today_week]
+  d_total <- attrib_flumomo[season %in% unique(d_week$season)]
+  d_total[, mxyrwk := max(yrwk), by = .(season)]
+  d_total <- d_total[yrwk == mxyrwk]
+
+  seasons <- unique(d_total$season)
+  seasons <- rev(sort(seasons))
+  seasons_colored <- seasons[1:4]
+  seasons_latest <- seasons[1]
+
+  pd <- attrib_flumomo[season %in% seasons]
+  pd[,max_x:=max(x),by=.(tag_exposure, season)]
+  labels <- pd[x==max_x]
+
+  x_val_min <- min(pd$x)
+  x_val_max <- max(pd$x)
+
+  labs <- unique(pd[,c("week","x")])
+  setorder(labs,x)
+  labs <- labs[week %in% seq(1,52,4)]
+
+
+  q <- ggplot(pd, aes(x=x, y=excess_est, group=season))
+  q <- q + geom_line(size=1)
+  q <- q + geom_line(data=pd[season %in% seasons_colored], mapping=aes(color=season),size=1)
+  q <- q + geom_line(data=pd[season %in% seasons_latest], mapping=aes(color=season), size=3)
+  q <- q + lemon::facet_rep_wrap(~tag_exposure, repeat.tick.labels = "y")
+  q <- q + scale_y_continuous(
+    glue::glue("Beregnet tilskrivbar d{fhi::nb$oe}delighet"),
+    breaks = scales::pretty_breaks(n=10),
+    labels = fhiplot::format_nor
+    )
+  q <- q + scale_x_continuous(
+    "Uke",
+    breaks = labs$x,
+    labels = labs$week,
+    limits=c(x_val_min,x_val_max+10)
+    )
+  q <- q + ggrepel::geom_label_repel(
+    data=labels,
+    mapping=aes(label=season),
+    nudge_y      = 0.0,
+    nudge_x      = 8.0,
+    direction    = "y",
+    angle        = 0,
+    vjust        = 0,
+    segment.size = 0.2
+  )
+  q <- q + fhiplot::theme_fhi_lines(base_size = 16, panel_on_top = FALSE)
+  q <- q + fhiplot::scale_color_fhi("Sesong",palette="combination")
+  q <- q + labs(title=glue::glue("Beregnet tilskrivbar d{fhi::nb$oe}delighet"))
+  q <- q + labs(caption = "Beregnet ved FluMOMO")
+  fhiplot::save_a4(q, fs::path(amort_folder(), "fig1.png"))
+}
+
 amort_rr_graphs <- function() {
   x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_amort"]$date_results)
   rrs <- fd::tbl("brain_amort_rr") %>%
@@ -450,28 +523,29 @@ amort_email_results <- function() {
   tab2_name <- "table2.png"
   tab2 <- fs::path(amort_folder(), tab2_name)
 
-  # fig1_name <- "fig1.png"
-  # fig1 <- fs::path(amort_folder(), fig1_name)
+  fig1_name <- "fig1.png"
+  fig1 <- fs::path(amort_folder(), fig1_name)
   #
   # fig2_name <- "fig2.png"
   # fig2 <- fs::path(amort_folder(), fig2_name)
 
   html <- glue::glue(
     "<html>",
-    "<h2>Dette er en TEST av data sammensl{fhi::nb$aa}ing. Ikke ta resultatene for seri{fhi::nb$oe}s</h2>",
+    "<h2>Dette er en TEST av data sammensl{fhi::nb$aa}ing og beregning av tilskrivbar d{fhi::nb$oe}delighet. Ikke ta resultatene for seri{fhi::nb$oe}s</h2>",
     "<b>Tabell 1.</b> XXXXXXX.<br><br>",
     "<img src='cid:{tab1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "<b>Tabell 2.</b> XXXXXXX.<br><br>",
     "<img src='cid:{tab2_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
+    "<b>Figur 1.</b> XXXXXXX.<br><br>",
+    "<img src='cid:{fig1_name}' width='800' align='middle' style='display:block;width:100%;max-width:800px' alt=''><br><br>",
     "</html>"
   )
 
   fd::mailgun(
     subject = glue::glue("Tilskrivbar d{fhi::nb$oe}delighet {normomo_yrwk()}"),
     html = html,
-    to = "dashboardsfhi@gmail.com",
-    bcc = fd::e_emails("ui_amort", is_final = actions[["ui_amort"]]$is_final()),
-    inlines = c(tab1, tab2),
+    to = fd::e_emails("ui_amort", is_final = actions[["ui_amort"]]$is_final()),
+    inlines = c(tab1, tab2, fig1),
     is_final = actions[["ui_amort"]]$is_final()
   )
 }
