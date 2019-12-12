@@ -28,18 +28,20 @@ sykdomspuls_mem <- R6::R6Class(
         region_sheet = create_region_sheet,
         n_doctors_sheet = create_n_doctors_sheet
       )
-
+      date <- rundate[package == "sykdomspuls"]$date_extraction
       for (i in 1:nrow(sykdomspuls::CONFIG$MEM)) {
         conf <- sykdomspuls::CONFIG$MEM[i]
-        folder <- glue::glue("mem_{conf$folder_name}")
+        
+        folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"),date)
+                                                 
         if(length( sykdomspuls::CONFIG$MEM) > 0){
           fs::dir_create(folder)
         }
         for(output in conf[, mem_outputs][[1]]){
-          outputs[[output]](conf, rundate[package == "sykdomspuls"]$date_extraction)
+          outputs[[output]](conf, date)
         }
         if(length( sykdomspuls::CONFIG$MEM) > 0){
-          fd::create_latest_folder(folder, rundate[package == "sykdomspuls"]$date_extraction)
+          fd::create_latest_folder(glue::glue("mem_{conf$folder_name}"), date)
         }
       }
 
@@ -176,15 +178,6 @@ create_region_sheet <- function(conf, date) {
   setDT(data)
   folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"), date)
 
-  out_data <- data %>%
-    dplyr::mutate(
-      rate = round(rate, 2),
-      loc_name = fd::get_location_name(location_code)
-    ) %>%
-    dplyr::select(yrwk, week, loc_name, rate, n, denominator)
-  setDT(out_data)
-  # Region excel file
-
   norway_locations <- fd::norway_locations()[, .(region_name=min(region_name)), by=.(county_code)]
   out_data <- data[norway_locations, on=c("location_code"="county_code")]
 
@@ -193,11 +186,10 @@ create_region_sheet <- function(conf, date) {
   
 
   overview <- dcast(out_data, yrwk + week ~ region_name, value.var = c("rate", "n", "denominator"))
-
   col_names <- names(overview)
-  col_names <- gsub("rate_([A-\u00D8a-\u00F80-9 \\s])*)$", "\\1 % ILI", col_names)
-  col_names <- gsub("n_([A-\u00D8a-\u00F80-9 \\s]*)$", "\\1 ILI konsultasjoner", col_names)
-  col_names <- gsub("denominator_([A-\u00D8a-\u00F80-9 \\s]*)$", "\\1 Totalt konsultasjoner", col_names)
+  col_names <- gsub("rate_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 % ILI", col_names)
+  col_names <- gsub("n_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 ILI konsultasjoner", col_names)
+  col_names <- gsub("denominator_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 Totalt konsultasjoner", col_names)
   col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
   col_names <- gsub("week$", "Uke", col_names)
   names(overview) <- col_names
@@ -245,8 +237,6 @@ create_n_doctors_sheet <- function(conf, date) {
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
   current_season <- current_season$season
-  conf
-  date <- "2019-12-04"
   x_tag <- conf$tag
   data <- fd::tbl("spuls_mem_results") %>%
     dplyr::filter(season == current_season & tag == x_tag & location_code == "norge") %>%
@@ -268,7 +258,7 @@ create_n_doctors_sheet <- function(conf, date) {
   col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
   col_names <- gsub("week$", "Uke", col_names)
   names(overview) <- col_names
-  setcolorder(overview, col_names[order(col_names)])
+  setcolorder(overview, col_names[c(1,2,3,5,4,6,7,9,8,10,11,13,12,14,15)])
   wb <- xlsx::createWorkbook(type = "xlsx")
   sheet_1 <- xlsx::createSheet(wb, sheetName = "Influensa")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")

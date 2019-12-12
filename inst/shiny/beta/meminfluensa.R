@@ -8,14 +8,16 @@ meminfluensaUI <- function(id, label = "Counter", GLOBAL) {
     ),
     column(
       width=10,
-      tabBox(
-        width=12,
+      tabsetPanel(
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("influensa_plot"), height="100%"), width=13, style='height:80vh')
+
+          br(),
+          div(style='height:80vh;text-align: center',plotOutput(ns("influensa_plot"), height="100%"))
         ),
         tabPanel(
           title="Info",
+          br(),
           p("Info")
         )
       )
@@ -47,7 +49,7 @@ meminfluensaServer <- function(input, output, session, GLOBAL) {
       collect()
     setDT(data)
     data[, granularity_time:="weekly"]
-    data <- calculate_confidence_interval(data, last_weeks=10)
+    data <- sykdomspuls::calculate_confidence_interval(data, last_weeks=10)
     return(data)
   })
 

@@ -10,20 +10,18 @@ number_weeklyUI <- function(id, label = "Counter", GLOBAL) {
     ),
     column(
       width=10,
-      tabBox(
-        width=12,
+      tabsetPanel(
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("weeklyNumberPlot"), height="100%"), width=13, style='height:60vh'),
-          box(plotOutput(ns("weeklyNumberPlotBrush"), height="100%", brush = brushOpts(ns("weeklyNumberBrush"), direction="x", opacity=0.4)), width=13, style='height:200px')
+          br(),
+          div(style='height:60vh;text-align: center',plotOutput(ns("weeklyNumberPlot"), height="100%")),
+          div(style='height:200px;text-align: center',plotOutput(ns("weeklyNumberPlotBrush"), height="100%", brush = brushOpts(ns("weeklyNumberBrush"), direction="x", opacity=0.4)))
         ),
         tabPanel(
           title="Info",
-          box(
-            width=13,
-            p("Grafen viser antall konsultasjoner per uke med en indikasjon om antallet er som forventet eller ikke. Valg av sykdom/symptom, sted og tidsrom gjøres på venstre side. Den svarte streken med rundingene viser antallet faktiske konsultasjoner. Bakgrunnsfargen er laget ut fra beregninger fra de foregående 5 årene i samme geografiske område. Når den svarte streken ligger i den grønne bakgrunnsfargen er antallet konsultasjoner som forventet og rundingen vises med svart. Når den svarte streken ligger i det gule feltet er antall konsultasjoner høyere enn forventet og fyllet i rundingen blir gult. Dersom den svarte streken ligger i det røde feltet er antall konsultasjoner betydelig høyere enn forventet og fyllet i rundingen blir rødt."),
-            p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
-          )
+          br(),
+          p("Grafen viser antall konsultasjoner per uke med en indikasjon om antallet er som forventet eller ikke. Valg av sykdom/symptom, sted og tidsrom gjøres på venstre side. Den svarte streken med rundingene viser antallet faktiske konsultasjoner. Bakgrunnsfargen er laget ut fra beregninger fra de foregående 5 årene i samme geografiske område. Når den svarte streken ligger i den grønne bakgrunnsfargen er antallet konsultasjoner som forventet og rundingen vises med svart. Når den svarte streken ligger i det gule feltet er antall konsultasjoner høyere enn forventet og fyllet i rundingen blir gult. Dersom den svarte streken ligger i det røde feltet er antall konsultasjoner betydelig høyere enn forventet og fyllet i rundingen blir rødt."),
+          p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
         )
       )
     )

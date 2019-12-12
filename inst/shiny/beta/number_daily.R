@@ -9,15 +9,16 @@ number_dailyUI <- function(id, label = "Counter", GLOBAL) {
     ),
     column(
       width=10,
-      tabBox(
-        width=12,
+      tabsetPanel(
         tabPanel(
           title="Figur",
-          box(plotOutput(ns("dailyNumberPlot"), height="100%"), width=13, style='height:60vh'),
-          box(plotOutput(ns("dailyNumberPlotBrush"), height="100%", brush = brushOpts(ns("dailyNumberBrush"), direction="x", opacity=0.4)), width=13, style='height:200px')
+          br(),
+          div(style='height:60vh;text-align: center',plotOutput(ns("dailyNumberPlot"), height="100%")),
+          div(style='height:200px;text-align: center',plotOutput(ns("dailyNumberPlotBrush"), height="100%", brush = brushOpts(ns("dailyNumberBrush"), direction="x", opacity=0.4)))
         ),
         tabPanel(
           title="Info",
+          br(),
           p("Grafen viser antall konsultasjoner per dag med en indikasjon om antallet er som forventet eller ikke. Valg av sykdom/symptom, sted og tidsrom gjøres på høyre side. Den svarte streken med rundingene viser antallet faktiske konsultasjoner. Bakgrunnsfargen er laget ut fra beregninger fra de foregående 5 årene. Når den svarte streken ligger i den grønne bakgrunnsfargen er antallet konsultasjoner som forventet og rundingen vises med svart. Når den svarte streken ligger i det gule feltet er antall konsultasjoner høyere enn forventet og fyllet i rundingen blir gult. Dersom den svarte streken ligger i det røde feltet er antall konsultasjoner betydelig høyere enn forventet og fyllet i rundingen blir rødt."),
           p("Se fanen *Om Sykdomspulsen* øverst for mer utfyllende informasjon om dataene og beregninger.")
         )
