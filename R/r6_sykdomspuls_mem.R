@@ -31,16 +31,16 @@ sykdomspuls_mem <- R6::R6Class(
       date <- rundate[package == "sykdomspuls"]$date_extraction
       for (i in 1:nrow(sykdomspuls::CONFIG$MEM)) {
         conf <- sykdomspuls::CONFIG$MEM[i]
-        
-        folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"),date)
-                                                 
-        if(length( sykdomspuls::CONFIG$MEM) > 0){
+
+        folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"), date)
+
+        if (length(sykdomspuls::CONFIG$MEM) > 0) {
           fs::dir_create(folder)
         }
-        for(output in conf[, mem_outputs][[1]]){
+        for (output in conf[, mem_outputs][[1]]) {
           outputs[[output]](conf, date)
         }
-        if(length( sykdomspuls::CONFIG$MEM) > 0){
+        if (length(sykdomspuls::CONFIG$MEM) > 0) {
           fd::create_latest_folder(glue::glue("mem_{conf$folder_name}"), date)
         }
       }
@@ -62,7 +62,7 @@ sykdomspuls_mem <- R6::R6Class(
 #' @param date extract date
 #'
 create_norway_sheet <- function(conf, date) {
- current_season <- fd::tbl("spuls_mem_results") %>%
+  current_season <- fd::tbl("spuls_mem_results") %>%
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
   current_season <- current_season$season
@@ -84,9 +84,6 @@ create_norway_sheet <- function(conf, date) {
     ) %>%
     dplyr::collect()
   readr::write_csv(ili_out, glue::glue("{folder}/ili_data.csv"))
-
-
-
 }
 
 #' create county sheet
@@ -95,7 +92,7 @@ create_norway_sheet <- function(conf, date) {
 #' @param date extract date
 #'
 create_county_sheet <- function(conf, date) {
- current_season <- fd::tbl("spuls_mem_results") %>%
+  current_season <- fd::tbl("spuls_mem_results") %>%
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
   current_season <- current_season$season
@@ -116,7 +113,7 @@ create_county_sheet <- function(conf, date) {
     ) %>%
     dplyr::select(yrwk, week, loc_name, rate, n, denominator)
   setDT(out_data)
- 
+
   overview <- dcast(out_data, yrwk + week ~ loc_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
   col_names <- gsub("rate_([A-\u00D8a-\u00F80-9-]*)$", "\\1 % ILI", col_names)
@@ -155,8 +152,6 @@ create_county_sheet <- function(conf, date) {
   )
   # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/fylke.xlsx"))
-
-
 }
 
 #' create MEM region sheet
@@ -165,7 +160,6 @@ create_county_sheet <- function(conf, date) {
 #' @param date extract date
 #'
 create_region_sheet <- function(conf, date) {
-
   current_season <- fd::tbl("spuls_mem_results") %>%
     dplyr::summarize(season = max(season, na.rm = T)) %>%
     dplyr::collect()
@@ -178,12 +172,12 @@ create_region_sheet <- function(conf, date) {
   setDT(data)
   folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"), date)
 
-  norway_locations <- fd::norway_locations()[, .(region_name=min(region_name)), by=.(county_code)]
-  out_data <- data[norway_locations, on=c("location_code"="county_code")]
+  norway_locations <- fd::norway_locations()[, .(region_name = min(region_name)), by = .(county_code)]
+  out_data <- data[norway_locations, on = c("location_code" = "county_code")]
 
-  out_data <- out_data[, .(n=sum(n), denominator=sum(denominator)), by=.(region_name, yrwk, week)]
-  out_data <- out_data[, rate:=round(n/denominator*100, 2)]
-  
+  out_data <- out_data[, .(n = sum(n), denominator = sum(denominator)), by = .(region_name, yrwk, week)]
+  out_data <- out_data[, rate := round(n / denominator * 100, 2)]
+
 
   overview <- dcast(out_data, yrwk + week ~ region_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
@@ -223,7 +217,6 @@ create_region_sheet <- function(conf, date) {
   )
   # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/regioner.xlsx"))
-
 }
 
 
@@ -244,13 +237,13 @@ create_n_doctors_sheet <- function(conf, date) {
   setDT(data)
   folder <- fd::results_folder(glue::glue("mem_{conf$folder_name}"), date)
 
-  doctors <- fread(fd::path("data_raw", "behandlere.txt", package="sykdomspuls"))
+  doctors <- fread(fd::path("data_raw", "behandlere.txt", package = "sykdomspuls"))
 
-  doctors[, yrwk:=paste(year, stringr::str_pad(week, 2, pad="0"),sep="-")]
+  doctors[, yrwk := paste(year, stringr::str_pad(week, 2, pad = "0"), sep = "-")]
 
-  
+
   overview <- dcast(data, yrwk + week ~ age, value.var = c("rate", "n", "denominator"))
-  overview <- overview[doctors[,.(yrwk,behandlere)], on=c("yrwk"="yrwk"), nomatch=0]
+  overview <- overview[doctors[, .(yrwk, behandlere)], on = c("yrwk" = "yrwk"), nomatch = 0]
   col_names <- names(overview)
   col_names <- gsub("rate_([0-9 + -]*)$", "\\1 % ILI", col_names)
   col_names <- gsub("n_([0-9 + -]*)$", "\\1 ILI konsultasjoner", col_names)
@@ -258,12 +251,12 @@ create_n_doctors_sheet <- function(conf, date) {
   col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
   col_names <- gsub("week$", "Uke", col_names)
   names(overview) <- col_names
-  setcolorder(overview, col_names[c(1,2,3,5,4,6,7,9,8,10,11,13,12,14,15)])
+  setcolorder(overview, col_names[c(1, 2, 3, 5, 4, 6, 7, 9, 8, 10, 11, 13, 12, 14, 15)])
   wb <- xlsx::createWorkbook(type = "xlsx")
   sheet_1 <- xlsx::createSheet(wb, sheetName = "Influensa")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-#  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"))
-#  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"))
+  #  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"))
+  #  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"))
 
   xlsx::addDataFrame(overview,
     sheet_1,
@@ -273,7 +266,7 @@ create_n_doctors_sheet <- function(conf, date) {
   info <- data.frame(
     Syndrom = conf$tag,
     ICPC2 = paste(conf$icpc2, sep = ","),
-    Konktattype = paste(conf$contactType[[1]], sep = ",",collapse=""),
+    Konktattype = paste(conf$contactType[[1]], sep = ",", collapse = ""),
     Oppdatert = date
   )
   xlsx::addDataFrame(info,
@@ -282,7 +275,6 @@ create_n_doctors_sheet <- function(conf, date) {
   )
   # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/behandlere.xlsx"))
-
 }
 
 
@@ -336,15 +328,15 @@ create_plots <- function(conf, date) {
   ))]
   for (i in 1:nrow(weeks)) {
     counties <- fd::norway_map_counties()
-    #print(counties)
+    # print(counties)
     xyrwk <- weeks$yrwk[i]
     plot_data <- counties[data[yrwk == xyrwk], on = .(location_code = location_code), nomatch = 0]
-    #print(plot_data)
+    # print(plot_data)
     ## plot_data[location_code =="county08", status:="Lavt"]
     ## plot_data[location_code =="county50", status:="Middels"]
     ## plot_data[location_code =="county10", status:="H\u00F8yt"]
     ## plot_data[location_code =="county02", status:="Sv\u00E6rt h\u00F8yt"]
-   # label_positions <- fd::norway_map_counties_label_positions()
+    # label_positions <- fd::norway_map_counties_label_positions()
 
     label_positions <- data.frame(
       location_code = c(
@@ -454,6 +446,4 @@ create_plots <- function(conf, date) {
     magick::image_write(image, filename, format = "png")
     ggsave(filename_legend, ggpubr::as_ggplot(legend), height = 3, width = 3)
   }
-
-
 }
