@@ -11,6 +11,7 @@ meminfluensaUI <- function(id, label = "Counter", GLOBAL) {
       tabsetPanel(
         tabPanel(
           title="Figur",
+
           br(),
           div(style='height:80vh;text-align: center',plotOutput(ns("influensa_plot"), height="100%"))
         ),
@@ -47,6 +48,8 @@ meminfluensaServer <- function(input, output, session, GLOBAL) {
                tag == "influensa") %>%
       collect()
     setDT(data)
+    data[, granularity_time:="weekly"]
+    data <- sykdomspuls::calculate_confidence_interval(data, last_weeks=10)
     return(data)
   })
 

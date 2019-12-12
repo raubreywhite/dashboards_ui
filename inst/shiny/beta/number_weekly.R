@@ -69,10 +69,14 @@ number_weeklyServer <- function(input, output, session, GLOBAL) {
         location_code== x_location &
         granularity_time=="weekly" &
         age == x_age) %>%
-      select(date, n, threshold2, threshold4, status) %>%
+      select(date, n, threshold2, threshold4, status,yrwk,denominator) %>%
       collect()
     setDT(retData)
-
+    retData[, location_code:=x_location]
+    retData[, granularity_time:="weekly"]
+    retData[, age:=x_age]
+    retData <- sykdomspuls::calculate_confidence_interval(retData, last_weeks=8)
+    
     retData$top <- max(c(retData$n, retData$threshold4), na.rm = T) + 2
     retData$bottom <- 0
 

@@ -261,3 +261,4 @@ GenerateOutbreakListInternal <- function(df = readRDS(fd::path("results", sprint
 
   return(outbreaks)
 }
+

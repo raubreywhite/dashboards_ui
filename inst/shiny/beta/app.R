@@ -5,6 +5,7 @@ library(magrittr)
 library(dplyr)
 library(ggplot2)
 
+
 shinyOptions(cache = diskCache("/tmp/", max_size = 50e6))
 
 source("global.R")
