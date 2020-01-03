@@ -174,10 +174,11 @@ create_region_sheet <- function(conf, date) {
 
   norway_locations <- fd::norway_locations()[, .(region_name = min(region_name)), by = .(county_code)]
   out_data <- data[norway_locations, on = c("location_code" = "county_code")]
-
   out_data <- out_data[, .(n = sum(n), denominator = sum(denominator)), by = .(region_name, yrwk, week)]
+  total <- out_data[, .(n = sum(n), denominator = sum(denominator)), by = .(yrwk, week)]
+  total[, region_name := "Norge"]
+  out_data <- rbindlist(list(out_data, total), use.names = TRUE)
   out_data <- out_data[, rate := round(n / denominator * 100, 2)]
-
 
   overview <- dcast(out_data, yrwk + week ~ region_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
@@ -188,17 +189,32 @@ create_region_sheet <- function(conf, date) {
   col_names <- gsub("week$", "Uke", col_names)
   names(overview) <- col_names
   setcolorder(overview, col_names[order(col_names)])
+
+
   wb <- xlsx::createWorkbook(type = "xlsx")
   sheet_rate <- xlsx::createSheet(wb, sheetName = "Andel ILI")
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"))
-  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"))
+  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"), -"Norge % ILI", "Norge % ILI")
+  consult_df <- overview %>% dplyr::select(
+    "\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"),
+    -"Norge ILI konsultasjoner", -"Norge Totalt konsultasjoner", "Norge ILI konsultasjoner", "Norge Totalt konsultasjoner"
+  )
 
+  s <- xlsx::CellStyle(wb, dataFormat = xlsx::DataFormat("#,##0.0"))
   xlsx::addDataFrame(rate_df,
     sheet_rate,
-    row.names = FALSE
+    row.names = FALSE,
+    colStyle = list(
+      "3" = s,
+      "4" = s,
+      "5" = s,
+      "6" = s,
+      "7" = s,
+      "8" = s
+    )
   )
+
   # xlsx::autoSizeColumn(sheet_rate, colIndex = 1:ncol(rate_df))
   xlsx::addDataFrame(consult_df,
     sheet_consult,
@@ -215,7 +231,14 @@ create_region_sheet <- function(conf, date) {
     sheet_info,
     row.names = FALSE
   )
-  # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
+  regions <- fd::norway_locations()[, .(Fylke = min(county_name), Region = min(region_name)), by = .(county_code)]
+
+  xlsx::addDataFrame(regions[, .(Fylke, Region)],
+    sheet_info,
+    row.names = FALSE,
+    startRow = 4,
+  )
+  xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/regioner.xlsx"))
 }
 
@@ -241,26 +264,44 @@ create_n_doctors_sheet <- function(conf, date) {
 
   doctors[, yrwk := paste(year, stringr::str_pad(week, 2, pad = "0"), sep = "-")]
 
+  doctors[, yrwk := paste(year, stringr::str_pad(week, 2, pad = "0"), sep = "-")]
+  doctors[, season := fhi::season(yrwk)]
+  prev_year <- as.integer(strsplit(current_season, split = "/")[[1]][1])
+  prev_season <- glue::glue("{prev_year - 1}/{prev_year}")
 
+  mean_doctors <- mean(doctors[season == prev_season & (week >= 40 | week <= 20), behandlere])
+
+
+  doctors[, "Andel_behandlere" := behandlere / mean_doctors * 100]
   overview <- dcast(data, yrwk + week ~ age, value.var = c("rate", "n", "denominator"))
-  overview <- overview[doctors[, .(yrwk, behandlere)], on = c("yrwk" = "yrwk"), nomatch = 0]
+  overview <- overview[doctors[, .(yrwk, behandlere, Andel_behandlere)],
+    on = c("yrwk" = "yrwk"), nomatch = 0
+  ]
+
   col_names <- names(overview)
   col_names <- gsub("rate_([0-9 + -]*)$", "\\1 % ILI", col_names)
   col_names <- gsub("n_([0-9 + -]*)$", "\\1 ILI konsultasjoner", col_names)
   col_names <- gsub("denominator_([0-9 + -]*)$", "\\1 Totalt konsultasjoner", col_names)
   col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
   col_names <- gsub("week$", "Uke", col_names)
+  col_names <- gsub("Andel_behandlere", "% Behandlere", col_names)
   names(overview) <- col_names
-  setcolorder(overview, col_names[c(1, 2, 3, 5, 4, 6, 7, 9, 8, 10, 11, 13, 12, 14, 15)])
+  setcolorder(overview, col_names[c(1, 2, 3, 5, 4, 6, 7, 9, 8, 10, 11, 13, 12, 14, 15, 16)])
   wb <- xlsx::createWorkbook(type = "xlsx")
   sheet_1 <- xlsx::createSheet(wb, sheetName = "Influensa")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  #  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"))
-  #  consult_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"))
+  s <- xlsx::CellStyle(wb, dataFormat = xlsx::DataFormat("#,##0.0"))
 
   xlsx::addDataFrame(overview,
     sheet_1,
-    row.names = FALSE
+    row.names = FALSE,
+    colStyle = list(
+      "3" = s,
+      "4" = s,
+      "5" = s,
+      "6" = s,
+      "16" = s
+    )
   )
   # xlsx::autoSizeColumn(sheet_consult, colIndex = 1:ncol(consult_df))
   info <- data.frame(
@@ -273,7 +314,7 @@ create_n_doctors_sheet <- function(conf, date) {
     sheet_info,
     row.names = FALSE
   )
-  # xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
+  xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/behandlere.xlsx"))
 }
 
