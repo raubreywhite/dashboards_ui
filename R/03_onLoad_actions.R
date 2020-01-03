@@ -9,7 +9,7 @@
       key = "ui_sykdomspuls_obs",
       value = fhi::isoyearweek(sykdomspuls_date()),
       dev_always_performs = TRUE,
-      production_days = c(3:5),
+      production_days = c(3, 4),
       first_date_of_production = "2019-09-21"
     )
 
@@ -17,7 +17,7 @@
       key = "ui_sykdomspuls_alert_pdf",
       value = fhi::isoyearweek(sykdomspuls_date()),
       dev_always_performs = TRUE,
-      production_days = c(3:5),
+      production_days = c(3, 4),
       first_date_of_production = "2019-09-21"
     )
 
@@ -25,7 +25,7 @@
       key = "ui_normomo_email",
       value = normomo_yrwk(),
       dev_always_performs = TRUE,
-      production_days = c(2:3),
+      production_days = c(2, 3),
       first_date_of_production = "2019-09-21"
     )
 
