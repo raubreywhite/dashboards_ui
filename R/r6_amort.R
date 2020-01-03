@@ -9,14 +9,14 @@ amort <- R6::R6Class(
   list(
     run_all = function() {
       # check to see if it can run
-      if (!fd::exists_rundate("brain_amort")) {
+      if (!fd::exists_rundate("brain_flumomo")) {
         return()
       }
       rundate <- fd::get_rundate()
 
       run <- TRUE
-      if (fd::exists_rundate("brain_amort") & fd::exists_rundate("ui_amort")) {
-        if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_amort"]$date_extraction) {
+      if (fd::exists_rundate("brain_flumomo") & fd::exists_rundate("ui_amort")) {
+        if (rundate[package == "ui_amort"]$date_extraction >= rundate[package == "brain_flumomo"]$date_extraction) {
           run <- FALSE
         }
       }
@@ -64,7 +64,7 @@ amort <- R6::R6Class(
 )
 
 amort_date <- function() {
-  fd::get_rundate()[package == "brain_amort"]$date_extraction
+  fd::get_rundate()[package == "brain_flumomo"]$date_extraction
 }
 
 amort_folder <- function() {
@@ -72,7 +72,7 @@ amort_folder <- function() {
 }
 
 amort_season_graphs <- function() {
-  d <- fd::tbl("brain_amort_results") %>%
+  d <- fd::tbl("brain_flumomo_results") %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
   d[exposure %in% c(
@@ -476,8 +476,8 @@ amort_figure_1 <- function() {
 }
 
 amort_rr_graphs <- function() {
-  x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_amort"]$date_results)
-  rrs <- fd::tbl("brain_amort_rr") %>%
+  x_yr <- fhi::isoyear_n(fd::get_rundate()[package == "brain_flumomo"]$date_results)
+  rrs <- fd::tbl("brain_flumomo_rr") %>%
     dplyr::filter(year_train_max == !!x_yr) %>%
     dplyr::collect() %>%
     fd::latin1_to_utf8()
