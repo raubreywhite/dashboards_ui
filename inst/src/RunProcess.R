@@ -5,7 +5,7 @@ options(bitmapType = 'cairo', device = 'png')
 
 normomo$new()$run_with_catch()
 
-sykdomspuls_mem$new()$run_with_catch()
+#sykdomspuls_mem$new()$run_with_catch()
 
 sykdomspuls_obs$new()$run_with_catch()
 
