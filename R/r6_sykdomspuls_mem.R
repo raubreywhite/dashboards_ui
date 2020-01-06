@@ -178,11 +178,11 @@ create_region_sheet <- function(conf, date) {
   total <- out_data[, .(n = sum(n), denominator = sum(denominator)), by = .(yrwk, week)]
   total[, region_name := "Norge"]
   out_data <- rbindlist(list(out_data, total), use.names = TRUE)
-  out_data <- out_data[, rate := round(n / denominator * 100, 2)]
+  out_data <- out_data[, rate := round(n / denominator, 4)]
 
   overview <- dcast(out_data, yrwk + week ~ region_name, value.var = c("rate", "n", "denominator"))
   col_names <- names(overview)
-  col_names <- gsub("rate_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 % ILI", col_names)
+  col_names <- gsub("rate_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 ILI", col_names)
   col_names <- gsub("n_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 ILI konsultasjoner", col_names)
   col_names <- gsub("denominator_([A-\u00D8a-\u00F80-9 \\s -]*)$", "\\1 Totalt konsultasjoner", col_names)
   col_names <- gsub("yrwk$", "\u00C5r-Uke", col_names)
@@ -195,13 +195,13 @@ create_region_sheet <- function(conf, date) {
   sheet_rate <- xlsx::createSheet(wb, sheetName = "Andel ILI")
   sheet_consult <- xlsx::createSheet(wb, sheetName = "Konsultasjoner")
   sheet_info <- xlsx::createSheet(wb, sheetName = "Info")
-  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", dplyr::ends_with("% ILI"), -"Norge % ILI", "Norge % ILI")
+  rate_df <- overview %>% dplyr::select("\u00C5r-Uke", "Uke", "\u00D8st ILI", "S\u00F8r ILI", "Vest ILI", "Midt-Norge ILI", "Nord-Norge ILI", "Norge ILI")
   consult_df <- overview %>% dplyr::select(
     "\u00C5r-Uke", "Uke", dplyr::ends_with("konsultasjoner"),
     -"Norge ILI konsultasjoner", -"Norge Totalt konsultasjoner", "Norge ILI konsultasjoner", "Norge Totalt konsultasjoner"
   )
 
-  s <- xlsx::CellStyle(wb, dataFormat = xlsx::DataFormat("#,##0.0"))
+  s <- xlsx::CellStyle(wb, dataFormat = xlsx::DataFormat("#,##0.0 %"))
   xlsx::addDataFrame(rate_df,
     sheet_rate,
     row.names = FALSE,
@@ -373,30 +373,26 @@ create_plots <- function(conf, date) {
     xyrwk <- weeks$yrwk[i]
     plot_data <- counties[data[yrwk == xyrwk], on = .(location_code = location_code), nomatch = 0]
     # print(plot_data)
-    ## plot_data[location_code =="county08", status:="Lavt"]
-    ## plot_data[location_code =="county50", status:="Middels"]
-    ## plot_data[location_code =="county10", status:="H\u00F8yt"]
-    ## plot_data[location_code =="county02", status:="Sv\u00E6rt h\u00F8yt"]
-    # label_positions <- fd::norway_map_counties_label_positions()
+    label_positions <- fd::norway_map_counties_label_positions()
 
-    label_positions <- data.frame(
-      location_code = c(
-        "county01", "county02", "county03", "county04",
-        "county05", "county06", "county07", "county08",
-        "county09", "county10", "county11", "county12",
-        "county14", "county15", "county18", "county19",
-        "county20", "county50"
-      ),
-      long = c(
-        11.266137, 11.2, 10.72028, 11.5, 9.248258, 9.3, 10.0, 8.496352,
-        8.45, 7.2, 6.1, 6.5, 6.415354, 7.8, 14.8, 19.244275, 24.7, 11
-      ),
+    ## label_positions <- data.frame(
+    ##   location_code = c(
+    ##     "county01", "county02", "county03", "county04",
+    ##     "county05", "county06", "county07", "county08",
+    ##     "county09", "county10", "county11", "county12",
+    ##     "county14", "county15", "county18", "county19",
+    ##     "county20", "county50"
+    ##   ),
+    ##   long = c(
+    ##     11.266137, 11.2, 10.72028, 11.5, 9.248258, 9.3, 10.0, 8.496352,
+    ##     8.45, 7.2, 6.1, 6.5, 6.415354, 7.8, 14.8, 19.244275, 24.7, 11
+    ##   ),
 
-      lat = c(
-        59.33375, 60.03851, 59.98, 61.26886, 61.25501, 60.3, 59.32481, 59.47989,
-        58.6, 58.4, 58.7, 60.25533, 61.6, 62.5, 66.5, 68.9, 69.6, 63
-      )
-    )
+    ##   lat = c(
+    ##     59.33375, 60.03851, 59.98, 61.26886, 61.25501, 60.3, 59.32481, 59.47989,
+    ##     58.6, 58.4, 58.7, 60.25533, 61.6, 62.5, 66.5, 68.9, 69.6, 63
+    ##   )
+    ## )
     cnames_whole_country <- plot_data[, .(rate, location_code)][label_positions, on = "location_code"]
 
     cnames_whole_country$rate <- format(round(cnames_whole_country$rate, 1), nsmall = 1)
