@@ -46,7 +46,9 @@ d[,status:=factor(
 county_order <- fd::norway_locations_long()[location_code %in% d$location_code]
 county_order <- rbind(county_order[.N],county_order[-.N])
 county_order <- county_order[.N:1]
-d[,location_name:=factor(location_name, levels=unique(county_order$location_name))]
+county_order[,location_name := factor(location_name, levels = location_name)]
+d[,location_name:=NULL]
+d[county_order,on="location_code", location_name:=location_name]
 
 d[,age:=factor(age,levels=rev(names(CONFIG$AGES)))]
 d[,yrwkdate:=glue::glue("{yrwk} ({date})",yrwk=yrwk,date=date)]
