@@ -206,7 +206,7 @@ sykdomspulspdf_plot_ages <- function(location_code, x_tag) {
     dplyr::collect() %>%
     fd::latin1_to_utf8()
   # remove last 3 weeks
-  yrwks <- rev(unique(data_long$yrwk))[-c(1:3)]
+  yrwks <- rev(sort(unique(data_long$yrwk)))[-c(1:3)]
   data_long <- data_long[yrwk %in% yrwks]
 
   data_long[, season := fhi::season(yrwk)]
