@@ -238,7 +238,7 @@ create_region_sheet <- function(conf, date) {
     row.names = FALSE,
     startRow = 4,
   )
-  xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
+  #xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/regioner.xlsx"))
 }
 
@@ -314,7 +314,7 @@ create_n_doctors_sheet <- function(conf, date) {
     sheet_info,
     row.names = FALSE
   )
-  xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
+  #xlsx::autoSizeColumn(sheet_info, colIndex = 1:ncol(info))
   xlsx::saveWorkbook(wb, glue::glue("{folder}/behandlere.xlsx"))
 }
 
