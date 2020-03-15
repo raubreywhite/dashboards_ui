@@ -1,5 +1,5 @@
 ---
-title: "`r params$name_long` i `r fd::get_location_name(params$location_code)` og nærområdene"
+title: "`r params$name_long` i `r fd::get_location_name(params$location_code)` og nærområdene, varslet i uke `r params$max_yrwk`"
 sub_title: "Sykdomspulsen, `r lubridate::today()`"
 header: "`r params$name_long` i `r fd::get_location_name(params$location_code)` og nærområdene"
 footer: "Sykdomspulsen, Folkehelseinstituttet, Oslo, Norge"
@@ -9,15 +9,16 @@ params:
   location_code: municip1103
   tag: gastro
   name_long: Magetarm
+  max_yrwk: "9999-99"
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-x_municip_code <- params$location_code
+x_location_code <- params$location_code
 x_tag <- params$tag
-x_county_code <- fd::norway_locations()[municip_code==x_municip_code]$county_code
-x_municip_name <- fd::get_location_name(x_municip_code)
+x_county_code <- fd::norway_locations()[municip_code==x_location_code]$county_code
+x_location_name <- fd::get_location_name(x_location_code)
 
 fd::initialize("sykdomspuls")
 
@@ -32,7 +33,9 @@ d <- fd::tbl("spuls_standard_results") %>%
     granularity_time=="weekly") %>% 
   dplyr::collect() %>%
   fd::latin1_to_utf8()
-
+if(x_location_code=="municip0301"){
+  d <- d[location_code!="county03"]
+}
 yrwks_summary <- rev(unique(d[,yrwk]))[1:12]
 yrwks_lines <- rev(unique(d[,yrwk]))[1:25]
 
@@ -54,7 +57,7 @@ d[,age:=factor(age,levels=rev(names(CONFIG$AGES)))]
 d[,yrwkdate:=glue::glue("{yrwk} ({date})",yrwk=yrwk,date=date)]
 
 analyses_municip <- unique(d[yrwk %in% yrwks_summary[1] & status!="Normal", location_code])
-analyses_municip <- c(x_municip_code, analyses_municip[analyses_municip!=x_municip_code])
+analyses_municip <- c(x_location_code, analyses_municip[analyses_municip!=x_location_code])
 ```
 
 ```{r include=FALSE}
@@ -164,15 +167,15 @@ lines_municip <- function(pd){
 }
 ```
 
-# Varselkilde (`r x_municip_name`)
+# Varselkilde (`r x_location_name`)
 
 ```{r echo=FALSE, fig.height=11.69*0.45, fig.width=8.27*0.7, message=FALSE, warning=FALSE}
-pd <- d[yrwk %in% yrwks_summary & location_code==x_municip_code]
+pd <- d[yrwk %in% yrwks_summary & location_code==x_location_code]
 tiles_municip(pd)
 ```
 
 ```{r echo=FALSE, fig.height=11.69*0.7, fig.width=8.27*0.7, message=FALSE, warning=FALSE}
-pd <- d[yrwk %in% yrwks_lines & location_code==x_municip_code]
+pd <- d[yrwk %in% yrwks_lines & location_code==x_location_code]
 lines_municip(pd)
 ```
 

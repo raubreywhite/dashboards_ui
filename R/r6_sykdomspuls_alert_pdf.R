@@ -35,9 +35,9 @@ sykdomspuls_alert_pdf <- R6::R6Class(
 )
 
 sykdomspuls_std_alerts_pdf <- function() {
-  fd::msg("Sykdomspuls: creating alerts pdf", slack = T)
+  fd::msg("Sykdomspuls: alerts pdf start", slack = T)
 
-  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results)
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results-6)
   tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   d <- fd::tbl("spuls_standard_results") %>%
@@ -66,6 +66,8 @@ sykdomspuls_std_alerts_pdf <- function() {
   d[, output_dir := fd::path("results", sykdomspuls_date(), "standard", "alert_pdfs", package = "sykdomspuls")]
   d[, attachment := fs::path(output_dir, output_file)]
 
+  fd::msg(glue::glue("Sykdomspuls: creating n={nrow(d)} alerts pdf"), slack = T)
+
   for (i in 1:nrow(d)) {
     Sys.sleep(1)
 
@@ -84,7 +86,8 @@ sykdomspuls_std_alerts_pdf <- function() {
       params = as.character(glue::glue(
         "location_code=\"{x_location_code}\",",
         "tag=\"{x_tag}\",",
-        "name_long=\"{x_name_long}\""
+        "name_long=\"{x_name_long}\",",
+        "max_yrwk=\"{max_yrwk}\""
       ))
     )
   }
@@ -119,4 +122,6 @@ sykdomspuls_std_alerts_pdf <- function() {
     attachments = attachments,
     is_final = actions[["sykdomspuls_alert_pdf"]]$is_final()
   )
+
+  fd::msg("Sykdomspuls: alerts pdf finished", slack = T)
 }
