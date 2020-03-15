@@ -136,7 +136,8 @@ EmailExternalGenerateTable <- function(results, xtag) {
 
 #' Sends an external email warning about alters
 sykdomspuls_obs_email_external <- function() {
-  max_date <- fd::get_rundate()[package == "sykdomspuls"]$date_results
+  # go 1 week back, to ensure that we are using a full week's data
+  max_date <- fd::get_rundate()[package == "sykdomspuls"]$date_results - 6
   yrwks <- fhi::isoyearweek(max_date - c(0, 7, 14, 21))
   tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 

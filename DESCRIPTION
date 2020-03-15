@@ -32,7 +32,8 @@ Imports:
   car,
   ggrepel,
   lemon,
-  readr
+  readr,
+  scales
 Suggests:
   testthat,
     knitr,
