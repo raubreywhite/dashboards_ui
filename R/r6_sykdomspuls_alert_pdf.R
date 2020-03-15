@@ -37,7 +37,7 @@ sykdomspuls_alert_pdf <- R6::R6Class(
 sykdomspuls_std_alerts_pdf <- function() {
   fd::msg("Sykdomspuls: alerts pdf start", slack = T)
 
-  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results-6)
+  max_yrwk <- fhi::isoyearweek(fd::get_rundate()[package == "sykdomspuls"]$date_results - 6)
   tag_relevant <- sykdomspuls::CONFIG$MODELS$standard[alertExternal == T]$tag
 
   d <- fd::tbl("spuls_standard_results") %>%
