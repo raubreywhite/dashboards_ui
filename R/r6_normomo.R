@@ -27,7 +27,7 @@ normomo <- R6::R6Class(
       # send email
       if (actions[["normomo_email"]]$can_perform_action()) {
         normomo_email_results()
-        normomo_email_ssi()
+        #normomo_email_ssi()
         actions[["normomo_email"]]$action_performed()
       }
 
