@@ -166,7 +166,7 @@ sykdomspuls_obs_email_external <- function() {
   }
 
   email_text_top <- glue::glue(
-    "<br><b>OBS varsel fra Sykdomspulsen oppdatert 11/10/2019.</b> ",
+    "<br><b>Dette er et OBS varsel fra Sykdomspulsen oppdatert {format(lubridate::today(),'%d.%m.%Y')}.</b> ",
     "Mer informasjon om Sykdomspulsen og OBS varselet finner du under tabellene.<br><br><br>"
   )
 
