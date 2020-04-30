@@ -1,6 +1,6 @@
 Package: ui
 Title: Depreciated - to be removed
-Version: 2020.04.21
+Version: 2020.04.30
 Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.5.0)
@@ -41,5 +41,5 @@ Suggests:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Additional_repositories: https://folkehelseinstituttet.github.io/drat/, https://raubreywhite.github.io/drat/, https://euromomonetwork.github.io/drat/

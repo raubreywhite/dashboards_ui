@@ -4,22 +4,23 @@
     load_package = FALSE
   )
 
-  tryCatch({
-    actions[["sykdomspuls_obs"]] <- fd::action$new(
-      key = "ui_sykdomspuls_obs",
-      value = fhi::isoyearweek(sykdomspuls_date()),
-      dev_always_performs = TRUE,
-      production_days = c(3, 4),
-      first_date_of_production = "2019-09-21"
-    )
+  tryCatch(
+    {
+      actions[["sykdomspuls_obs"]] <- fd::action$new(
+        key = "ui_sykdomspuls_obs",
+        value = fhi::isoyearweek(sykdomspuls_date()),
+        dev_always_performs = TRUE,
+        production_days = c(3, 4),
+        first_date_of_production = "2019-09-21"
+      )
 
-    actions[["sykdomspuls_alert_pdf"]] <- fd::action$new(
-      key = "ui_sykdomspuls_alert_pdf",
-      value = fhi::isoyearweek(sykdomspuls_date()),
-      dev_always_performs = TRUE,
-      production_days = c(3, 4),
-      first_date_of_production = "2019-09-21"
-    )
+      actions[["sykdomspuls_alert_pdf"]] <- fd::action$new(
+        key = "ui_sykdomspuls_alert_pdf",
+        value = fhi::isoyearweek(sykdomspuls_date()),
+        dev_always_performs = TRUE,
+        production_days = c(3, 4),
+        first_date_of_production = "2019-09-21"
+      )
 
     actions[["normomo_email"]] <- fd::action$new(
       key = "ui_normomo_email",
