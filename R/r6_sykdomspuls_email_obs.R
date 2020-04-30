@@ -166,8 +166,9 @@ sykdomspuls_obs_email_external <- function() {
   }
 
   email_text_top <- glue::glue(
-    "<br><b>Dette er et OBS varsel fra Sykdomspulsen oppdatert {format(lubridate::today(),'%d.%m.%Y')}.</b> ",
-    "Mer informasjon om Sykdomspulsen og OBS varselet finner du under tabellene.<br><br><br>"
+    "<br>Sykdomspulsen for kommunehelsetjenesten har f\u00E5tt ny webside, logg dere p\u00E5 her! https://spuls.fhi.no<br>",
+    "<br><b>Dette er det siste OBS varselet fra den gamle Sykdomspulsen l\u00F8sningen, og den gamle websiden legges ned 1. juni 2020.</b><br>",
+    "Dersom dere har problemer med påloggingen eller andre sp\u00F8rsm\u00E5l, vennligst send en mail til sykdomspulsen@fhi.no<br><br><br>"
   )
 
   email_text_bottom <- glue::glue(
