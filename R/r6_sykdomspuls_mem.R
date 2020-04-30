@@ -397,7 +397,7 @@ create_plots <- function(conf, date) {
 
     cnames_whole_country$rate <- format(round(cnames_whole_country$rate, 1), nsmall = 1)
 
-    cnames_country <- cnames_whole_country[ !(location_code %in% c("county02", "county03"))]
+    cnames_country <- cnames_whole_country[!(location_code %in% c("county02", "county03"))]
     cnames_osl_ak <- cnames_whole_country[location_code %in% c("county02", "county03")]
     week_string <- gsub("([0-9]*)-([0-9]*)$", "\\2 \\1", xyrwk)
     map_plot <- ggplot() +
@@ -406,7 +406,6 @@ create_plots <- function(conf, date) {
         color = "#808080", size = 0.1
       ) +
       theme_void() +
-
       scale_fill_manual("Niv\u00E5",
         breaks = c(
           "Sv\u00E6rt lavt",

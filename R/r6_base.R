@@ -8,17 +8,18 @@ UIBase <- R6::R6Class(
   list(
     run_with_catch = function() {
       print(class(self)[1])
-      tryCatch({
-        self$run_all()
-      },
-      error = function(e) {
-        if (fd::config$is_production) {
-          fd::msg("ERROR", slack = T)
-          fd::msg(e, slack = T)
-        } else {
-          stop(e)
+      tryCatch(
+        {
+          self$run_all()
+        },
+        error = function(e) {
+          if (fd::config$is_production) {
+            fd::msg("ERROR", slack = T)
+            fd::msg(e, slack = T)
+          } else {
+            stop(e)
+          }
         }
-      }
       )
     },
     run_all = function() {
