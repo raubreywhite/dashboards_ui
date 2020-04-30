@@ -21,21 +21,21 @@
       first_date_of_production = "2019-09-21"
     )
 
-    # actions[["normomo_email"]] <- fd::action$new(
-    #   key = "ui_normomo_email",
-    #   value = normomo_yrwk(),
-    #   dev_always_performs = TRUE,
-    #   production_days = c(2, 3),
-    #   first_date_of_production = "2019-09-21"
-    # )
+    actions[["normomo_email"]] <- fd::action$new(
+      key = "ui_normomo_email",
+      value = normomo_yrwk(),
+      dev_always_performs = TRUE,
+      production_days = c(2, 3),
+      first_date_of_production = "2019-09-21"
+    )
 
-    # actions[["ui_amort"]] <- fd::action$new(
-    #   key = "ui_amort_email",
-    #   value = normomo_yrwk(),
-    #   dev_always_performs = TRUE,
-    #   production_days = c(3, 4),
-    #   first_date_of_production = "2019-09-21"
-    # )
+    actions[["ui_amort"]] <- fd::action$new(
+      key = "ui_amort_email",
+      value = normomo_yrwk(),
+      dev_always_performs = TRUE,
+      production_days = c(3, 4),
+      first_date_of_production = "2019-09-21"
+    )
   },
   error = function(e) {
     fd::msg("No database available")
