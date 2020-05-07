@@ -7,9 +7,9 @@ options(bitmapType = 'cairo', device = 'png')
 
 sykdomspuls_mem$new()$run_with_catch()
 
-sykdomspuls_obs$new()$run_with_catch()
+#sykdomspuls_obs$new()$run_with_catch()
 
-sykdomspuls_alert_pdf$new()$run_with_catch()
+#sykdomspuls_alert_pdf$new()$run_with_catch()
 
 sykdomspulspdf$new()$run_with_catch()
 
